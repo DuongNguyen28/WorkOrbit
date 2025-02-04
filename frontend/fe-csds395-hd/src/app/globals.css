@@ -1,0 +1,30 @@
+/* styles/globals.css */
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #00171F; /* Dark Blue background */
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  color: #003459; /* Another dark-ish blue for text */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* app/globals.css OR styles/globals.css */
+
+/* Your existing global styles can stay here if you have them */
+
+/* 1. Tailwind base */
+@tailwind base;
+
+/* 2. Tailwind components */
+@tailwind components;
+
+/* 3. Tailwind utilities */
+@tailwind utilities;
+
+/* Optionally, you can add or override some global styles after these directives. */
+
