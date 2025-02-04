@@ -1,0 +1,8 @@
+docx
+fastapi
+googletrans
+moviepy
+pydantic
+SpeechRecognition
+uvicorn
+pymupdf
