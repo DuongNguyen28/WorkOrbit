@@ -61,5 +61,5 @@ async def main():
     output_file = "Japanese_test to Vietnamese.docx"
     await process_file(input_file, output_file)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     asyncio.run(main())
