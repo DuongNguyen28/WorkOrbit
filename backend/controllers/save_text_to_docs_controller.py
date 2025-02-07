@@ -1,18 +1,26 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from ..services.document_service import DocumentService
+from fastapi import APIRouter
+
 
 router = APIRouter()
-document_service = DocumentService()
 
-@router.post("/save/text/", summary="Convert text to .docx and return the file directly")
-async def save_text_to_doc(text: str = None):
+app = FastAPI()
+documentService = DocumentService()
+class TextRequest(BaseModel):
+    text: str
+
+@router.post("/save-text-to-doc")
+async def save_text_to_doc(request: TextRequest):
     """Accepts an optional string in the request body, generates a unique .docx file,
     and returns it as a downloadable response."""
+    text = request.text
     if not text:
-        return {"error": "No text provided"}
+        raise HTTPException(status_code=400, detail="No text provided")
 
-    file_path = document_service.save_text_as_doc(text)
+    file_path = documentService.save_text_as_doc(text)
 
     return FileResponse(
         file_path,

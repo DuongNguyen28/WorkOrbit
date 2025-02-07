@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .controllers.translation_text_controller import router as translation_router
-from .controllers.translation_text_to_docs_controller import router as document_router
+from .controllers.save_text_to_docs_controller import router as document_router
 from .controllers.translation_video_controller import router as video_translator_router
 from .controllers.translation_pdf_to_doc_controller import router as pdf_to_doc_router
 
