@@ -76,17 +76,25 @@ const TranslatePage: NextPage = () => {
 
     try {
       console.log("translated đây: " + translatedText)
-      const res = await fetch('http://localhost:8000/save-text', {
+      console.log({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: translatedText }),
       })
+      const res = await fetch('http://localhost:8000/save-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: translatedText,
+      })
+
 
       if (!res.ok) {
         throw new Error(`Server error: ${res.status} - ${res.statusText}`)
       }
 
       const data = await res.json()
+
+      console.log(data)
       setProcessedText(data.processed_text)
     } catch (err) {
       console.error('Process endpoint error:', err)

@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 from docx import Document
 import uuid
 import os
+import json
 
 
 
@@ -167,8 +168,11 @@ async def save_text_to_doc(text: str = None):
     Accepts an optional string in the request body, generates a unique .docx file,
     and returns it as a downloadable response.
     """
-    if not text:
-        return {"error": "No text provided"}
+
+    # if not text:
+    #     return {"error": "No text provided"}
+
+    jsonText = json.loads(text)
 
     unique_id = str(uuid.uuid4())  # Generate a unique identifier
     file_name = f"{unique_id}.docx"  # Unique filename
@@ -176,7 +180,7 @@ async def save_text_to_doc(text: str = None):
 
     # Create a Word document and save the text
     doc = Document()
-    doc.add_paragraph(text)
+    doc.add_paragraph(jsonText.text)
     doc.save(file_path)
 
     # Return the file as a direct download (renamed to "translated_document.docx")
