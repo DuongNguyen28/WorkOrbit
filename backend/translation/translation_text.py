@@ -9,6 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import uuid
 import os
 
+# Async function to translate text
+from typing import List
+import math
+
 app = FastAPI()
 
 # Enable CORS
@@ -21,6 +25,7 @@ app.add_middleware(
 )
 
 translator = Translator()
+MAX_CHARS_PER_REQUEST = 5000  # Google Translate's limit
 
 # Define a request model for translation with language options
 class TranslationRequest(BaseModel):
@@ -53,12 +58,6 @@ def validate_language_code(lang_code: str) -> str:
     return lang_code
 
 # Async function to translate text
-MAX_CHARS_PER_REQUEST = 5000  # Google Translate's limit
-
-# Async function to translate text
-from typing import List
-import math
-
 MAX_CHARS_PER_REQUEST = 5000  # Google Translate's limit
 
 async def translate_text(text: str, source_lang: str = 'en', dest_lang: str = 'vi') -> str:
