@@ -62,6 +62,3 @@ async def translate_audio(file: UploadFile = File(...)):
         filename='translation_output.txt'
     )
 
-@app.get("/")
-async def read_root():
-    return {"message": "Hello, world!"}

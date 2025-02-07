@@ -5,13 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Form
 from fastapi.responses import FileResponse
 from docx import Document
-from fastapi.middleware.cors import CORSMiddleware
 import uuid
 import os
 
 # Async function to translate text
 from typing import List
-import math
 
 app = FastAPI()
 
@@ -182,6 +180,7 @@ async def save_text_to_doc(text: str = Form(...)):
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         filename="translated_document.docx"
     )
+
 
 
 # Run the FastAPI app
