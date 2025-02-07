@@ -2,7 +2,7 @@ import uuid
 import os
 from docx import Document
 
-class DocumentService:
+class TextToDocService:
     def __init__(self):
         self.OUTPUT_DIR = "docs"
         os.makedirs(self.OUTPUT_DIR, exist_ok=True)

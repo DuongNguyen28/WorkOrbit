@@ -1,14 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from ..services.document_service import DocumentService
+from ..services.text_to_docx_service import TextToDocService
 from fastapi import APIRouter
 
 
 router = APIRouter()
 
 app = FastAPI()
-documentService = DocumentService()
+textToDocService = TextToDocService()
 class TextRequest(BaseModel):
     text: str
 
@@ -20,7 +20,7 @@ async def save_text_to_doc(request: TextRequest):
     if not text:
         raise HTTPException(status_code=400, detail="No text provided")
 
-    file_path = documentService.save_text_as_doc(text)
+    file_path = textToDocService.save_text_as_doc(text)
 
     return FileResponse(
         file_path,
