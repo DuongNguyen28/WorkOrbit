@@ -7,7 +7,7 @@ from ..services.video_translation_service import VideoTranslatorService
 router = APIRouter()
 video_translator_service = VideoTranslatorService()
 
-@router.post("/translate-video")
+@router.post("/translate/video")
 async def translate_video(file: UploadFile = File(...)):
     """Accepts a video file, extracts audio, transcribes it, translates it, and generates a .docx document."""
     
