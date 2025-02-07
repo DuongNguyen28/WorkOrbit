@@ -47,8 +47,55 @@ def validate_language_code(lang_code: str) -> str:
     return lang_code
 
 # Async function to translate text
+MAX_CHARS_PER_REQUEST = 5000  # Google Translate's limit
+
+# Async function to translate text
+from typing import List
+import math
+
+MAX_CHARS_PER_REQUEST = 5000  # Google Translate's limit
+
 async def translate_text(text: str, source_lang: str = 'en', dest_lang: str = 'vi') -> str:
-    """Translate text between specified languages."""
+    """
+    Translate text by splitting it into chunks of maximum size while preserving word boundaries.
+    
+    Args:
+        text (str): The text to translate
+        source_lang (str): Source language code
+        dest_lang (str): Destination language code
+        
+    Returns:
+        str: Complete translated text
+    """
+    def split_into_chunks(text: str, max_chars: int = MAX_CHARS_PER_REQUEST) -> List[str]:
+        """Split text into chunks of maximum size while preserving word boundaries."""
+        chunks = []
+        current_chunk = []
+        current_length = 0
+        
+        # Split text into words
+        words = text.split()
+        
+        for word in words:
+            # Account for space between words
+            word_length = len(word) + (1 if current_length > 0 else 0)
+            
+            if current_length + word_length > max_chars:
+                # Current chunk is full, start a new one
+                chunks.append(' '.join(current_chunk))
+                current_chunk = [word]
+                current_length = len(word)
+            else:
+                # Add word to current chunk
+                current_chunk.append(word)
+                current_length += word_length
+        
+        # Add the last chunk if it exists
+        if current_chunk:
+            chunks.append(' '.join(current_chunk))
+            
+        return chunks
+
     try:
         # Validate language codes
         source_lang = validate_language_code(source_lang)
@@ -57,17 +104,25 @@ async def translate_text(text: str, source_lang: str = 'en', dest_lang: str = 'v
         if not text.strip():
             raise HTTPException(status_code=400, detail="Text cannot be empty")
         
-        # Perform translation
-        translation = await translator.translate(
-            text, 
-            src=source_lang, 
-            dest=dest_lang
-        )
+        # Split text into chunks
+        chunks = split_into_chunks(text)
         
-        return translation.text
+        # Translate each chunk
+        translated_chunks = []
+        for chunk in chunks:
+            translation = await translator.translate(
+                chunk,
+                src=source_lang,
+                dest=dest_lang
+            )
+            translated_chunks.append(translation.text)
+        
+        # Join translated chunks with appropriate spacing
+        return ' '.join(translated_chunks)
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Translation error: {str(e)}")
+
 
 # API Endpoint to translate text
 @app.post("/translate/text")
