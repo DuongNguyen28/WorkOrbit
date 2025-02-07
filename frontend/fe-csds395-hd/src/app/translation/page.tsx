@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import Select, { SingleValue } from 'react-select'
 import languages from '@/data/languages.json'
@@ -19,6 +19,16 @@ const TranslatePage: NextPage = () => {
   const [translatedText, setTranslatedText] = useState('')
   const [processedText, setProcessedText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   const handleTranslate = async () => {
     if (!sourceLang || !targetLang || !originalText) {
@@ -65,7 +75,8 @@ const TranslatePage: NextPage = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:8000/process', {
+      console.log("translated đây: " + translatedText)
+      const res = await fetch('http://localhost:8000/save-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: translatedText }),
