@@ -2,16 +2,22 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from googletrans import Translator, LANGUAGES
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Request
 from fastapi.responses import FileResponse
 from docx import Document
 import uuid
 import os
 
+
+
 # Async function to translate text
 from typing import List
 
 app = FastAPI()
+
+# Directory to store documents
+OUTPUT_DIR = "docs"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Enable CORS
 app.add_middleware(
@@ -155,16 +161,15 @@ async def get_available_languages():
         ]
     }
 
-# Directory to store documents
-OUTPUT_DIR = "docs"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
 @app.post("/save-text/", summary="Convert text to .docx and return the file directly")
-async def save_text_to_doc(text: str = Form(...)):
+async def save_text_to_doc(text: str = None):
     """
-    Accepts a string of text, generates a unique .docx file,
+    Accepts an optional string in the request body, generates a unique .docx file,
     and returns it as a downloadable response.
     """
+    if not text:
+        return {"error": "No text provided"}
+
     unique_id = str(uuid.uuid4())  # Generate a unique identifier
     file_name = f"{unique_id}.docx"  # Unique filename
     file_path = os.path.join(OUTPUT_DIR, file_name)
@@ -180,7 +185,6 @@ async def save_text_to_doc(text: str = Form(...)):
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         filename="translated_document.docx"
     )
-
 
 
 # Run the FastAPI app
