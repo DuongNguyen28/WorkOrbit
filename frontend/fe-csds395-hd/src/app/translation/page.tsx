@@ -28,13 +28,46 @@ const TranslatePage: NextPage = () => {
 
     setIsLoading(true)
     setTranslatedText('')
+    
 
-    // Simulate a translation API call
-    setTimeout(() => {
-      const mockResult = `${originalText} [translated from ${sourceLang.label} to ${targetLang.label}]`
-      setTranslatedText(mockResult)
+    console.log(sourceLang.code + " " + targetLang.code + " " + originalText)
+    try {
+      // Update the fetch URL to match your FastAPI server and port
+      const response = await fetch('http://localhost:8000/translate/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: originalText,
+          source_lang: sourceLang.code,
+          dest_lang: targetLang.code,
+        }),
+      })
+
+      console.log(response)
+
+      if (!response.ok) {
+        // If the server returned an error, throw an error to be caught below
+        throw new Error(`Server error: ${response.status} - ${response.statusText}`)
+      }
+
+      // Parse the JSON response
+      const data = await response.json()
+
+      // data should look like:
+      // {
+      //   "original_text": "Hello",
+      //   "source_language": "en",
+      //   "destination_language": "vi",
+      //   "translated_text": "Xin chào"
+      // }
+
+      setTranslatedText(data.translated_text)
+    } catch (error) {
+      console.error('Translation error:', error)
+      alert('There was a problem translating your text. Please try again.')
+    } finally {
       setIsLoading(false)
-    }, 2000)
+    }
   }
 
   /**
@@ -60,10 +93,8 @@ const TranslatePage: NextPage = () => {
             value={sourceLang}
             onChange={(option: SingleValue<LanguageOption>) => setSourceLang(option)}
             placeholder="Type or pick a language..."
-            // Show "English (en)" in the dropdown, for example
             getOptionLabel={(option) => `${option.label} (${option.code})`}
             getOptionValue={(option) => option.code}
-            // Enable partial matching on code or label
             filterOption={filterLanguageOption}
             isClearable
           />
