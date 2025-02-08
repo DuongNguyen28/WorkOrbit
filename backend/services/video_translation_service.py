@@ -1,4 +1,4 @@
-import moviepy.editor as mp
+import moviepy as mp
 import speech_recognition as sr
 from googletrans import Translator
 from docx import Document
