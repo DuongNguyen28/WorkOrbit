@@ -1,16 +1,17 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, File, UploadFile, Depends
+from fastapi.responses import FileResponse
 from ..services.text_to_docx_service import TextToDocService
-from fastapi import APIRouter
 
-
-router = APIRouter()
 
 app = FastAPI()
-textToDocService = TextToDocService()
+router = APIRouter()
+
+text_to_doc_service = TextToDocService()
+
 class TextRequest(BaseModel):
-    text: str
+    text: str  # Ensure the frontend sends JSON with this exact structure
 
 @router.post("/save-text-to-doc")
 async def save_text_to_doc(request: TextRequest):
@@ -20,7 +21,7 @@ async def save_text_to_doc(request: TextRequest):
     if not text:
         raise HTTPException(status_code=400, detail="No text provided")
 
-    file_path = textToDocService.save_text_as_doc(text)
+    file_path = text_to_doc_service.save_text_as_doc(text)
 
     return FileResponse(
         file_path,
