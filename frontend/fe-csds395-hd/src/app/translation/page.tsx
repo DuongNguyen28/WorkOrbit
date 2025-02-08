@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import Select, { SingleValue } from 'react-select'
 import languages from '@/data/languages.json'
@@ -19,6 +19,16 @@ const TranslatePage: NextPage = () => {
   const [translatedText, setTranslatedText] = useState('')
   const [processedText, setProcessedText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   const handleTranslate = async () => {
     if (!sourceLang || !targetLang || !originalText) {
@@ -58,30 +68,70 @@ const TranslatePage: NextPage = () => {
     }
   }
 
-  const handleProcess = async () => {
+  // const handleProcess = async () => {
+  //   if (!translatedText) {
+  //     alert('No translated text found. Please translate something first.')
+  //     return
+  //   }
+
+  //   try {
+  //     console.log("translated đây: " + translatedText)
+  //     console.log({
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ text: translatedText }),
+  //     })
+  //     const res = await fetch('http://localhost:8000/save-text-to-doc', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: translatedText,
+  //     })
+
+
+  //     if (!res.ok) {
+  //       throw new Error(`Server error: ${res.status} - ${res.statusText}`)
+  //     }
+
+  //     const data = await res.json()
+
+  //     console.log(data)
+  //     setProcessedText(data.processed_text)
+  //   } catch (err) {
+  //     console.error('Process endpoint error:', err)
+  //     alert('There was a problem processing your text. Please try again.')
+  //   }
+  // }
+
+  const handleDownload = async () => {
     if (!translatedText) {
-      alert('No translated text found. Please translate something first.')
-      return
+          alert('No translated text found. Please translate something first.')
+          return
     }
-
-    try {
-      const res = await fetch('http://localhost:8000/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("http://localhost:8000/save-text-to-doc", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
         body: JSON.stringify({ text: translatedText }),
-      })
+    });
 
-      if (!res.ok) {
-        throw new Error(`Server error: ${res.status} - ${res.statusText}`)
-      }
-
-      const data = await res.json()
-      setProcessedText(data.processed_text)
-    } catch (err) {
-      console.error('Process endpoint error:', err)
-      alert('There was a problem processing your text. Please try again.')
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error:", errorData);
+        return;
     }
-  }
+
+    // Handle file download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "translated_document.docx";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+};
+
 
   const filterLanguageOption = (
     option: { label: string; data: LanguageOption },
@@ -192,7 +242,7 @@ const TranslatePage: NextPage = () => {
          * Microsoft Word–style doc icon + gradient background
          */}
         <button
-          onClick={handleProcess}
+          onClick={handleDownload}
           disabled={!translatedText}
           className="doc-button"
         >
