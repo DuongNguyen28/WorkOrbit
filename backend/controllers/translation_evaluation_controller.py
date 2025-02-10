@@ -4,7 +4,7 @@ from ..services.translation_evaluation_service import TranslationEvaluationServi
 router = APIRouter()
 evaluation_service = TranslationEvaluationService()
 
-@router.post("/evaluate/translation")
+@router.post("/translate/evaluation")
 async def evaluate_translation(src_lang: str, dest_lang: str, original_text: str, translated_text: str, ):
     """
     Accepts original text, translated text, source language, and destination language

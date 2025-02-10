@@ -6,8 +6,6 @@ class TranslationEvaluationService:
         P, R, F1 = score([translated_text], [original_text], lang=dest_lang)  # Use destination language
         bert_score = F1.mean().item()
 
-        # You can include more logic to handle other metrics or methods if necessary
-
         # Final review score based on BERTScore
         final_score = round(bert_score, 2)
 
