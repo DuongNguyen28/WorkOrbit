@@ -3,6 +3,7 @@ import pymupdf
 from docx import Document
 from docx.shared import Pt
 from ..services.language_detection_service import LanguageDetectionService
+
 class PdfToDocxTranslatorService:
     def __init__(self):
         self.translator = Translator()

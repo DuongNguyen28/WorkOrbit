@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from ..services.translation_services import TranslationService
+from ..services.text_translation_services import TranslationService
 
 router = APIRouter()
 translation_service = TranslationService()

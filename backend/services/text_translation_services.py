@@ -1,10 +1,12 @@
 from googletrans import Translator, LANGUAGES
 from fastapi import HTTPException
 from typing import List
+from ..services.language_detection_service import LanguageDetectionService
 
 class TranslationService:
     def __init__(self):
         self.translator = Translator()
+        self.language_service = LanguageDetectionService()
         self.MAX_CHARS_PER_REQUEST = 5000
 
     def validate_language_code(self, lang_code: str) -> str:
@@ -50,6 +52,14 @@ class TranslationService:
         return chunks
 
     async def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
+        warnings = []
+
+        detected_language = await self.language_service.detect_language(text)
+        # Compare detected language with the user's selected source language
+        if detected_language != source_lang:
+            warnings.append(f"Warning: Detected language is {detected_language}, but the selected language is {source_lang}.")
+            return warnings  # Return the warning and stop further processing
+
         """Translate text by splitting it into chunks and translating each chunk."""
         try:
             source_lang = self.validate_language_code(source_lang)
