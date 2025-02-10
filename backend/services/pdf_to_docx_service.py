@@ -1,23 +1,18 @@
-import asyncio
 from googletrans import Translator
 import pymupdf
 from docx import Document
 from docx.shared import Pt
-
-class PdfTranslatorService:
+from ..services.language_detection_service import LanguageDetectionService
+class PdfToDocxTranslatorService:
     def __init__(self):
         self.translator = Translator()
+        self.language_detector = LanguageDetectionService()
 
     async def translate_text(self, text: str, src_language: str, dest_language: str) -> str:
         translator = Translator()
         # Translate the text from src_language to dest_language
         translation = await translator.translate(text, src=src_language, dest=dest_language)
         return translation.text
-
-    async def detect_language(self, text: str) -> str:
-        """Detect the language of the provided text."""
-        detection = await self.translator.detect(text)
-        return detection.lang
 
     async def translate_pdf(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         """Extract text from a PDF, detect its language, compare with the selected source language, and translate."""
@@ -37,7 +32,7 @@ class PdfTranslatorService:
                             alltext += span["text"]
 
                     # Detect the language of the extracted text
-                    detected_language = await self.detect_language(alltext)
+                    detected_language = await self.language_detector.detect_language(alltext)
 
                     # Compare detected language with the user's selected source language
                     if detected_language != src_language:
@@ -62,7 +57,6 @@ class PdfTranslatorService:
         # If no warnings, return an empty list (indicating no issues)
         return warnings
 
-
     async def process_file(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         """Determine file type, detect language, and process accordingly."""
         if input_path.endswith('.pdf'):
@@ -76,7 +70,3 @@ class PdfTranslatorService:
             return {"message": "Translation successful", "file_link": output_path}
         else:
             raise ValueError("Unsupported file format.")
-
-
-        
-    

@@ -2,8 +2,6 @@ import moviepy as mp
 import speech_recognition as sr
 from googletrans import Translator
 from docx import Document
-import tempfile
-import os
 
 class VideoTranslatorService:
     def __init__(self):

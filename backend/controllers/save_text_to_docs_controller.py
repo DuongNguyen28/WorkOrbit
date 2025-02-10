@@ -1,6 +1,6 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter
 from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, File, UploadFile, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from ..services.text_to_docx_service import TextToDocService
 
