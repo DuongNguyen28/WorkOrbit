@@ -7,7 +7,6 @@ from .controllers.translation_pdf_to_doc_controller import router as pdf_to_doc_
 from .controllers.detect_language_controller import router as language_detection_router
 from .controllers.translation_evaluation_controller import router as translation_evaluation_router
 
-
 app = FastAPI()
 
 # Enable CORS
