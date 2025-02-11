@@ -1,10 +1,12 @@
 from googletrans import Translator
 import pymupdf
+from google.cloud import translate_v2 as translate
 from ..services.language_detection_service import LanguageDetectionService
 
 class PdfToPdfTranslationService:
     def __init__(self):
         self.translator = Translator()
+        self.translate_client = translate.Client()
         self.language_service = LanguageDetectionService()
         self.languages = {
             "af": "Afrikaans",
@@ -131,6 +133,19 @@ class PdfToPdfTranslationService:
         else:
             raise ValueError("Unsupported file format.")
 
+    async def translate_text(self, target: str, text: str):
+        """Translates text into the target language.
+
+        Target must be an ISO 639-1 language code.
+        See https://g.co/cloud/translate/v2/translate-reference#supported_languages
+        """
+        if isinstance(text, bytes):
+            text = text.decode("utf-8")
+
+        result = self.translate_client.translate(text, target_language=target)
+
+        return result["translatedText"]
+
     async def translate_pdf(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         doc = pymupdf.open(input_path)
         ocg_xref = doc.add_ocg(self.languages.get(dest_language), on=True)
@@ -153,9 +168,9 @@ class PdfToPdfTranslationService:
                     warnings.append(f"Warning: Detected language is {detected_language}, but the selected language is {src_language}.")
                     return warnings  # Return the warning and stop further processing
                 
-                # Invoke the actual translation to deliver us a Korean string
-                translation = await self.translator.translate(src_text, src=src_language, dest=dest_language)
-                dest_text = translation.text if translation else "Translation Error"
+                # Invoke the actual translation to deliver us a string
+                translation = await self.translate_text(dest_language, src_text)
+                dest_text = translation if translation else "Translation Error"
 
                 # Cover the English text with a white rectangle.
                 if isinstance(dest_text, str) and dest_text.strip():
