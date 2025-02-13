@@ -35,18 +35,17 @@ class PdfToDocxTranslatorService:
                     for line in block["lines"]:
                         for span in line["spans"]:
                             alltext += span["text"]
-                        alltext += "\n"
 
                     # Detect the language of the extracted text
-                    detected_language = await self.language_detector.detect_language(alltext)
+                    # detected_language = await self.language_detector.detect_language(alltext)
 
-                    # Compare detected language with the user's selected source language
-                    if detected_language != src_language:
-                        warnings.append(f"Warning: Detected language is {detected_language}, but the selected language is {src_language}.")
-                        return warnings  # Return the warning and stop further processing
+                    # # Compare detected language with the user's selected source language
+                    # if detected_language != src_language:
+                    #     warnings.append(f"Warning: Detected language is {detected_language}, but the selected language is {src_language}.")
+                    #     return warnings  # Return the warning and stop further processing
                     
                     # Translate the text to the destination language
-                    translation = await self.translate_text(dest_language, src_text)
+                    translation = await self.translate_text(dest_language, alltext)
                     alltext = ""
 
                     # Handle text formatting and add it to the Word document
