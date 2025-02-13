@@ -1,11 +1,11 @@
-from googletrans import Translator
+# from googletrans import Translator
 import pymupdf
 from google.cloud import translate_v2 as translate
 from ..services.language_detection_service import LanguageDetectionService
 
 class PdfToPdfTranslationService:
     def __init__(self):
-        self.translator = Translator()
+        # self.translator = Translator()
         self.translate_client = translate.Client()
         self.language_service = LanguageDetectionService()
         self.languages = {
@@ -134,11 +134,6 @@ class PdfToPdfTranslationService:
             raise ValueError("Unsupported file format.")
 
     async def translate_text(self, target: str, text: str):
-        """Translates text into the target language.
-
-        Target must be an ISO 639-1 language code.
-        See https://g.co/cloud/translate/v2/translate-reference#supported_languages
-        """
         if isinstance(text, bytes):
             text = text.decode("utf-8")
 
@@ -157,8 +152,8 @@ class PdfToPdfTranslationService:
             blocks = page.get_text("blocks", flags=textflags)
 
             for block in blocks:
-                bbox = block[:4]  # area containing the text
-                src_text = block[4]  # the text of this block
+                bbox = block[:4]
+                src_text = block[4]
 
                 # Detect the language of the extracted text
                 detected_language = await self.language_service.detect_language(src_text)
@@ -172,9 +167,7 @@ class PdfToPdfTranslationService:
                 translation = await self.translate_text(dest_language, src_text)
                 dest_text = translation if translation else "Translation Error"
 
-                # Cover the English text with a white rectangle.
                 if isinstance(dest_text, str) and dest_text.strip():
-                    # Cover the original text with a white rectangle
                     page.draw_rect(bbox, color=None, fill=WHITE, oc=ocg_xref)
                     try:
                         page.insert_htmlbox(bbox, dest_text, oc=ocg_xref)
