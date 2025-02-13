@@ -1,19 +1,23 @@
-from googletrans import Translator
+# from googletrans import Translator
 import pymupdf
 from docx import Document
 from docx.shared import Pt
+from google.cloud import translate_v2 as translate
 from ..services.language_detection_service import LanguageDetectionService
 
 class PdfToDocxTranslatorService:
     def __init__(self):
-        self.translator = Translator()
+        # self.translator = Translator()
+        self.translate_client = translate.Client()
         self.language_detector = LanguageDetectionService()
 
-    async def translate_text(self, text: str, src_language: str, dest_language: str) -> str:
-        translator = Translator()
-        # Translate the text from src_language to dest_language
-        translation = await translator.translate(text, src=src_language, dest=dest_language)
-        return translation.text
+    async def translate_text(self, target: str, text: str):
+        if isinstance(text, bytes):
+            text = text.decode("utf-8")
+
+        result = self.translate_client.translate(text, target_language=target)
+
+        return result["translatedText"]
 
     async def translate_pdf(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         """Extract text from a PDF, detect its language, compare with the selected source language, and translate."""
@@ -33,15 +37,15 @@ class PdfToDocxTranslatorService:
                             alltext += span["text"]
 
                     # Detect the language of the extracted text
-                    detected_language = await self.language_detector.detect_language(alltext)
+                    # detected_language = await self.language_detector.detect_language(alltext)
 
-                    # Compare detected language with the user's selected source language
-                    if detected_language != src_language:
-                        warnings.append(f"Warning: Detected language is {detected_language}, but the selected language is {src_language}.")
-                        return warnings  # Return the warning and stop further processing
+                    # # Compare detected language with the user's selected source language
+                    # if detected_language != src_language:
+                    #     warnings.append(f"Warning: Detected language is {detected_language}, but the selected language is {src_language}.")
+                    #     return warnings  # Return the warning and stop further processing
                     
                     # Translate the text to the destination language
-                    vietnamese_text = await self.translate_text(alltext, src_language, dest_language)
+                    translation = await self.translate_text(dest_language, alltext)
                     alltext = ""
 
                     # Handle text formatting and add it to the Word document
@@ -49,7 +53,7 @@ class PdfToDocxTranslatorService:
                     font_size = span["size"]
 
                     p = document.add_paragraph()
-                    run = p.add_run(vietnamese_text)
+                    run = p.add_run(translation)
                     run.font.name = font_name
                     run.font.size = Pt(font_size)
 
