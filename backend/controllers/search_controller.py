@@ -1,8 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile, HTTPException
 from services.elasticsearch_service import ElasticSearchService
 import re
 
-router = APIRouter(
+search_router = APIRouter(
     prefix="/search",
     tags=["search"],
     responses={404: {"description": "Not found"}},
@@ -10,7 +10,21 @@ router = APIRouter(
 es = ElasticSearchService()
 
 
-@router.post("/")
+@search_router.post("/upload")
+def upload(file: UploadFile = File(...)):
+    try:
+        contents = file.file.read()
+        with open(file.filename, "wb") as f:
+            f.write(contents)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Something went wrong")
+    finally:
+        file.file.close()
+
+    return {"message": f"Successfully uploaded {file.filename}"}
+
+
+@search_router.post("/")
 def handle_search(query: str):
     filters, parsed_query = extract_filters(query)
     from_ = 0  # for pagination
@@ -74,7 +88,7 @@ def handle_search(query: str):
     }
 
 
-@router.get("/documents/{doc_id}")
+@search_router.get("/documents/{doc_id}")
 async def retrieve_document(doc_id: str):
     document = es.retrieve_document(doc_id)
     title = document["_source"]["name"]
