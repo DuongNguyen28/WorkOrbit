@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from ..services.text_translation_services import TranslationService
+import html
 
 router = APIRouter()
 translation_service = TranslationService()
@@ -14,7 +15,7 @@ class TranslationRequest(BaseModel):
 async def translate_text_api(request: TranslationRequest):
     """API endpoint to translate text with language selection."""
     translated_text = await translation_service.translate(
-        text=request.text, 
+        src_text=request.text, 
         source_lang=request.source_lang, 
         dest_lang=request.dest_lang
     )

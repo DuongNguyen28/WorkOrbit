@@ -1,11 +1,11 @@
-from googletrans import Translator, LANGUAGES
+from .translate_client import TranslateClient
 from fastapi import HTTPException
 from typing import List
 from ..services.language_detection_service import LanguageDetectionService
 
 class TranslationService:
     def __init__(self):
-        self.translator = Translator()
+        self.translate_client = TranslateClient()
         self.language_service = LanguageDetectionService()
         self.MAX_CHARS_PER_REQUEST = 5000
 
@@ -29,53 +29,20 @@ class TranslationService:
         
         return lang_code
 
-    def split_into_chunks(self, text: str, max_chars: int = 5000) -> List[str]:
-        """Split text into chunks of maximum size while preserving word boundaries."""
-        chunks = []
-        current_chunk = []
-        current_length = 0
-        words = text.split()
-        
-        for word in words:
-            word_length = len(word) + (1 if current_length > 0 else 0)
-            if current_length + word_length > max_chars:
-                chunks.append(' '.join(current_chunk))
-                current_chunk = [word]
-                current_length = len(word)
-            else:
-                current_chunk.append(word)
-                current_length += word_length
-        
-        if current_chunk:
-            chunks.append(' '.join(current_chunk))
-            
-        return chunks
-
-    async def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
+    async def translate(self, src_text: str, source_lang: str, dest_lang: str) -> str:
         warnings = []
 
-        detected_language = await self.language_service.detect_language(text)
+        detected_language = await self.language_service.detect_language(src_text)
         # Compare detected language with the user's selected source language
         if detected_language != source_lang:
             warnings.append(f"Warning: Detected language is {detected_language}, but the selected language is {source_lang}.")
             return warnings  # Return the warning and stop further processing
 
-        """Translate text by splitting it into chunks and translating each chunk."""
-        try:
-            source_lang = self.validate_language_code(source_lang)
-            dest_lang = self.validate_language_code(dest_lang)
-            
-            if not text.strip():
-                raise HTTPException(status_code=400, detail="Text cannot be empty")
-            
-            chunks = self.split_into_chunks(text)
-            
-            translated_chunks = []
-            for chunk in chunks:
-                translation = await self.translator.translate(chunk, src=source_lang, dest=dest_lang)
-                translated_chunks.append(translation.text)
-            
-            return ' '.join(translated_chunks)
+        translation = await self.translate_client.translate_text(src_text, dest_lang)
+        dest_text = translation if translation else "Translation Error"
+        print(dest_text)
+
+        return dest_text
         
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Translation error: {str(e)}")
+        # except Exception as e:
+        #     raise HTTPException(status_code=500, detail=f"Translation error: {str(e)}")

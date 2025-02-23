@@ -1,14 +1,12 @@
-# from googletrans import Translator
 import pymupdf
 from docx import Document
 from docx.shared import Pt
-from google.cloud import translate_v2 as translate
+from .translate_client import TranslateClient
 from ..services.language_detection_service import LanguageDetectionService
 
 class PdfToDocxTranslatorService:
     def __init__(self):
-        # self.translator = Translator()
-        self.translate_client = translate.Client()
+        self.translate_client = TranslateClient()
         self.language_detector = LanguageDetectionService()
 
     async def translate_text(self, target: str, text: str):
@@ -45,7 +43,7 @@ class PdfToDocxTranslatorService:
                     #     return warnings  # Return the warning and stop further processing
                     
                     # Translate the text to the destination language
-                    translation = await self.translate_text(dest_language, alltext)
+                    translation = await self.translate_client.translate_text(alltext, dest_language)
                     alltext = ""
 
                     # Handle text formatting and add it to the Word document
