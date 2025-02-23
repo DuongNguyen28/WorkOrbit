@@ -14,11 +14,9 @@ class PdfToPdfTranslationService:
         if input_path.endswith('.pdf'):
             warnings = await self.translate_pdf(input_path, output_path, src_language, dest_language)
             
-            # If there are any warnings, return only the warnings without the file
             if warnings:
                 return {"error": warnings}
             
-            # If no warnings, return the translated file link
             return {"message": "Translation successful", "file_link": output_path}
         else:
             raise ValueError("Unsupported file format.")
