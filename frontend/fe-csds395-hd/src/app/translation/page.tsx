@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import type { NextPage } from 'next'
 import Select, { SingleValue } from 'react-select'
 import languages from '@/data/languages.json'
+import Header from '@components/header/Header'
 
 interface LanguageOption {
   code: string
@@ -199,7 +200,9 @@ const TranslatePage: NextPage = () => {
   }
 
   return (
-    <div className="container">
+    <div>
+      <Header/>
+      <div className="container">
       <h1 className="title">Translation Portal</h1>
       <div className="tab-container">
         <button
@@ -683,7 +686,9 @@ const TranslatePage: NextPage = () => {
           }
         }
       `}</style>
+      </div>
     </div>
+    
   )
 }
 
