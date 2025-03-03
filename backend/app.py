@@ -9,6 +9,7 @@ from .controllers.translation_evaluation_controller import (
     router as translation_evaluation_router,
 )
 from .controllers.search_controller import search_router
+from .controllers.auth_controller import auth_controller
 
 app = FastAPI()
 
@@ -29,6 +30,10 @@ app.include_router(pdf_to_doc_router)
 app.include_router(language_detection_router)
 app.include_router(translation_evaluation_router)
 app.include_router(search_router)
+app.include_router(auth_controller)
 
 # If you want to run the app with `uvicorn` or similar tools, use:
 # uvicorn app:app --reload
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to WorkOrbit!"} 

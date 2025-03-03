@@ -1,5 +1,6 @@
 annotated-types
 anyio
+bcrypt
 beautifulsoup4
 bert-score
 cachetools
@@ -15,6 +16,7 @@ exceptiongroup
 fastapi
 fastapi-cli
 filelock
+firebase-admin
 fonttools
 fsspec
 google
@@ -96,7 +98,7 @@ typing_extensions
 tzdata
 urllib3
 uvicorn
-uvloop
+uvloop; platform_system != "Windows"
 watchfiles
 websockets
 zipp
