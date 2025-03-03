@@ -12,6 +12,7 @@ decorator
 dnspython
 email_validator
 exceptiongroup
+elasticsearch
 fastapi
 fastapi-cli
 filelock
@@ -77,6 +78,7 @@ rich
 rich-toolkit
 rsa
 safetensors
+sentence_transformers
 shellingham
 six
 sniffio

@@ -16,6 +16,8 @@ class PdfToPdfTranslationService:
             
             if warnings:
                 return {"error": warnings}
+
+            print(output_path)
             
             return {"message": "Translation successful", "file_link": output_path}
         else:
