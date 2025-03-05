@@ -11,6 +11,7 @@ contourpy
 cycler
 decorator
 dnspython
+elasticsearch
 email_validator
 exceptiongroup
 fastapi
@@ -79,6 +80,7 @@ rich
 rich-toolkit
 rsa
 safetensors
+sentence_transformers
 shellingham
 six
 sniffio
