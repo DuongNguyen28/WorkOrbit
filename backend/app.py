@@ -8,6 +8,7 @@ from .controllers.detect_language_controller import router as language_detection
 from .controllers.translation_evaluation_controller import (
     router as translation_evaluation_router,
 )
+from .controllers.chat_bot_controller import router as chat_bot_router
 from .controllers.search_controller import search_router
 
 app = FastAPI()
@@ -29,6 +30,7 @@ app.include_router(pdf_to_doc_router)
 app.include_router(language_detection_router)
 app.include_router(translation_evaluation_router)
 app.include_router(search_router)
+app.include_router(chat_bot_router)
 
 # If you want to run the app with `uvicorn` or similar tools, use:
 # uvicorn app:app --reload
