@@ -3,11 +3,15 @@ from docx import Document
 from docx.shared import Pt
 from .translate_client import TranslateClient
 from ..services.language_detection_service import LanguageDetectionService
+from ..services.gcs_upload_service import GCSFileUploadService
+import time
+import os
 
 class PdfToDocxTranslatorService:
     def __init__(self):
         self.translate_client = TranslateClient()
         self.language_detector = LanguageDetectionService()
+        self.gcs_uploader = GCSFileUploadService("workorbit")
 
     async def translate_text(self, target: str, text: str):
         if isinstance(text, bytes):
@@ -62,14 +66,22 @@ class PdfToDocxTranslatorService:
 
     async def process_file(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         """Determine file type, detect language, and process accordingly."""
+        output_path = f"{input_path}_{src_language}-{dest_language}_{int(time.time())}.pdf"
         if input_path.endswith('.pdf'):
             warnings = await self.translate_pdf(input_path, output_path, src_language, dest_language)
             
-            # If there are any warnings, return only the warnings without the file
             if warnings:
                 return {"error": warnings}
-            
-            # If no warnings, return the translated file link
-            return {"message": "Translation successful", "file_link": output_path}
+
+            gcs_file_link = self.gcs_uploader.upload_file(
+                local_file_path=output_path,
+                destination_blob_name=f"translated_pdfs/{os.path.basename(output_path)}"
+            )
+
+            return {
+                "message": "Translation successful",
+                "file_link": output_path,
+                "cloud_link": gcs_file_link
+            }
         else:
             raise ValueError("Unsupported file format.")

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from services.elasticsearch_service import ElasticSearchService
+from ..services.elasticsearch_service import ElasticSearchService
 import re
 
 search_router = APIRouter(

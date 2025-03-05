@@ -1,6 +1,6 @@
 import moviepy as mp
 import speech_recognition as sr
-from googletrans import Translator
+from .translate_client import TranslateClient
 from docx import Document
 import tempfile
 import os
@@ -8,7 +8,7 @@ from ..services.language_detection_service import LanguageDetectionService
 
 class VideoTranslatorService:
     def __init__(self):
-        self.translator = Translator()
+        self.translate_client = TranslateClient()
         self.recognizer = sr.Recognizer()
         self.language_service = LanguageDetectionService()
 
@@ -64,10 +64,10 @@ class VideoTranslatorService:
         # Process video
         self.extract_audio_from_video(video_path, audio_path)
 
-        text = self.transcribe_audio_to_text(audio_path)
+        src_text = self.transcribe_audio_to_text(audio_path)
 
         # Language detection
-        detected_language = await self.language_service.detect_language(text)
+        detected_language = await self.language_service.detect_language(src_text)
         if detected_language != src_language:
             warnings.append(f"Warning: Detected language is {detected_language}, but the selected language is {src_language}.")
             # Cleanup temporary files
@@ -75,9 +75,9 @@ class VideoTranslatorService:
             os.unlink(audio_path)
             return warnings, None
         
-        translated_text = await self.translate_text(text, src_language, dest_language)
+        translation = await self.translate_client.translate_text(src_text, dest_language)
         
-        self.write_translation_to_doc(text, translated_text, doc_path)
+        self.write_translation_to_doc(src_text, translation, doc_path)
         
         # Cleanup temporary files
         os.unlink(video_path)
