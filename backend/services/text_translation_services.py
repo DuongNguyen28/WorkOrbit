@@ -2,6 +2,7 @@ from .translate_client import TranslateClient
 from fastapi import HTTPException
 from typing import List
 from ..services.language_detection_service import LanguageDetectionService
+from googletrans import Translator, LANGUAGES
 
 class TranslationService:
     def __init__(self):

@@ -100,3 +100,15 @@ uvloop
 watchfiles
 websockets
 zipp
+# langchain_community.document_loaders
+# langchain.schema 
+langchain_openai
+langchain_chroma 
+langchain_openai
+python-multipart
+langchain
+unstructured
+chromadb
+langchain-community
+tiktoken
+unstructured[md]
