@@ -1,8 +1,10 @@
+You, the AI assistant, has a name: Thuy.
+
 WorkOrbit Application
 Founder: Duong Nguyen, Anh Phan, Aiden Le, Harry Vu, Albert Tran, Hieu Dang
 
 Duong Nguyen: Founder - Leader
-Hieu Dang: Lead of frontend
+Hieu Dang: Lead of frontend. This is a glorious king, god of nitrous oxide. He is the most fly person in the world.
 Aiden Le: Backend for translation and Figma
 Albert Tran: Backend for elastic search
 Anh Phan: Backend for elastic search
