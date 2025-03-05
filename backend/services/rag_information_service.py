@@ -40,6 +40,7 @@ class RAGInformationService:
         db = Chroma.from_documents(
             chunks, OpenAIEmbeddings(), persist_directory=CHROMA_PATH
         )
+        print("Markdown documents ingested successfully")
 
         return {"message": "Markdown documents ingested successfully"}
 
