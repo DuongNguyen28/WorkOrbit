@@ -10,6 +10,7 @@ contourpy
 cycler
 decorator
 dnspython
+Elasticsearch
 email_validator
 exceptiongroup
 elasticsearch
