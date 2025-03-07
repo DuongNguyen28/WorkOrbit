@@ -48,7 +48,7 @@ const Header: React.FC = () => {
           font-size: 1.5rem;
           font-weight: 700;
           color: #FFFFFF;
-          font-family: 'Instrument Sans';
+          font-family: 'Montserrat';
         }
 
         .header__right {
