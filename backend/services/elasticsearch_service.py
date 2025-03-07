@@ -34,7 +34,7 @@ class ElasticSearchService:
     def insert_document(self, document):
         return self.es.index(
             index="idx",
-            document={**document, "embedding": self.get_embedding(document["content"])},
+            document={**document, "embedding": self.get_embedding(document["summary"])},
         )
 
     def insert_documents(self, documents):
@@ -48,7 +48,7 @@ class ElasticSearchService:
 
     def reindex(self):
         self.create_index()
-        with open(os.getcwd() + "/misc/testdata.json", "rt") as f:
+        with open(os.getcwd() + "/backend/misc/testdata.json", "rt") as f:
             documents = json.loads(f.read())
         return self.insert_documents(documents=documents)
 
@@ -58,29 +58,32 @@ class ElasticSearchService:
     def retrieve_document(self, id):
         return self.es.get(index="idx", id=id)
 
-    def ingest_document(self):
-        cwd = os.getcwd()
-        with open(cwd + "/misc/test.pdf", "rb") as pdf_file:
+    def ingest_document(self, filename):
+        with open(os.getcwd() + "/backend/misc/"+filename, "rb") as pdf_file:
             enc_file = base64.b64encode(pdf_file.read()).decode("utf-8")
-            print(enc_file)
+            #print(enc_file)
 
         resp = self.es.ingest.put_pipeline(
             id="attachment",
             description="Extract attachment information",
-            processors=[{"attachment": {"field": "data", "remove_binary": True}}],
+            processors=[{"attachment": {
+                "field": "data", 
+                "properties": ["content", "date", "title", "content_length"],
+                "remove_binary": True
+                }}],
         )
-        print(resp)
+        #print(resp)
 
         resp1 = self.es.index(
             index="idx",
-            id="my_id",
+            # id="my_id",
             pipeline="attachment",
             document={"data": enc_file},
         )
         print(resp1)
 
-        resp2 = self.es.get(
-            index="idx",
-            id="my_id",
-        )
-        print(resp2)
+        # resp2 = self.es.get(
+        #     index="idx",
+        #     # id="my_id",
+        # )
+        # print(resp2)

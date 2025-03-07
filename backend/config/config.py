@@ -5,3 +5,4 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GCP_API_KEY = os.getenv("GCP_API_KEY")
