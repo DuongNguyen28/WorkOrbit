@@ -69,5 +69,7 @@ translated_pdfs/
 
 chroma_db/
 
+docs/
+
 # Ignore macOS-specific files
 .DS_Store
