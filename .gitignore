@@ -67,7 +67,7 @@ node_modules/
 # Ignore generated PDF translations (if applicable)
 translated_pdfs/
 
-*/chroma_db/
+chroma_db/
 
 # Ignore macOS-specific files
 .DS_Store
