@@ -66,7 +66,7 @@ class PdfToDocxTranslatorService:
 
     async def process_file(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         """Determine file type, detect language, and process accordingly."""
-        output_path = f"{input_path}_{src_language}-{dest_language}_{int(time.time())}.pdf"
+        # output_path = f"{input_path}_{src_language}-{dest_language}_{int(time.time())}.pdf"
         if input_path.endswith('.pdf'):
             warnings = await self.translate_pdf(input_path, output_path, src_language, dest_language)
             
@@ -77,11 +77,7 @@ class PdfToDocxTranslatorService:
                 local_file_path=output_path,
                 destination_blob_name=f"translated_pdfs/{os.path.basename(output_path)}"
             )
-
-            return {
-                "message": "Translation successful",
-                "file_link": output_path,
-                "cloud_link": gcs_file_link
-            }
+            
+            return {"message": "Translation successful", "file_link": output_path}
         else:
             raise ValueError("Unsupported file format.")

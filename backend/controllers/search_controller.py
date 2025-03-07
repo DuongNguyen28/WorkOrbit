@@ -10,10 +10,6 @@ search_router = APIRouter(
 )
 es = ElasticSearchService()
 
-@search_router.post("/resetidx")
-def reset_test_idx():
-    es.create_index()
-
 @search_router.post("/testidx")
 def setup_test_idx():
     es.reindex()
@@ -42,7 +38,8 @@ def upload(file: UploadFile = File(...)):
 @search_router.post("/")
 def handle_search(query: str):
     filters, parsed_query = extract_filters(query)
-    from_ = 0  # for pagination
+    print(parsed_query)
+    from_ = 0 # for pagination
 
     if parsed_query:
         search_query = {

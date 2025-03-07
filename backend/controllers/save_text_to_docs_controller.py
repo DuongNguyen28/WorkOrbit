@@ -23,6 +23,8 @@ async def save_text_to_doc(request: TextRequest):
 
     file_path = text_to_doc_service.save_text_as_doc(text)
 
+    print(file_path)
+
     return FileResponse(
         file_path,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",

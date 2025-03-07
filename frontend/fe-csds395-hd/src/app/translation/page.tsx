@@ -7,7 +7,7 @@ import languages from '@/data/languages.json'
 
 // Import your header component
 import Header from '@components/header/Header'
-import Chatbot from '@/components/header/Chatbot'
+import Chatbot from '@components/header/Chatbot'
 
 interface LanguageOption {
   code: string
@@ -27,6 +27,8 @@ const TranslatePage: NextPage = () => {
   const [translatedText, setTranslatedText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  // --- File Translation states ---
+  // Supported types: 'pdfToDocx', 'pdfToPdf', and 'videoToDoc'
   const [fileTranslationType, setFileTranslationType] = useState<
     'videoToDoc' | 'pdfToDocx' | 'pdfToPdf'
   >('pdfToDocx')
@@ -130,36 +132,50 @@ const TranslatePage: NextPage = () => {
       alert('Please select a file and both languages before translating.')
       return
     }
+
     setIsFileLoading(true)
     setFileTranslationResult('')
 
     try {
-      if (fileTranslationType === 'pdfToPdf') {
-        setTimeout(() => {
-          setFileTranslationResult('/dummy.pdf')
-          setIsFileLoading(false)
-        }, 1000)
-        return
-      }
-
       const formData = new FormData()
       formData.append('file', fileToTranslate)
       formData.append('src_language', fileSourceLang.code)
       formData.append('dest_language', fileTargetLang.code)
-      formData.append('mode', fileTranslationType)
 
-      const response = await fetch('http://localhost:8000/translate/file', {
+      // Set dest_file based on selected translation type.
+      let dest_file = ''
+      if (fileTranslationType === 'pdfToDocx') {
+        dest_file = 'docx'
+      } else if (fileTranslationType === 'pdfToPdf') {
+        dest_file = 'pdf'
+      } else if (fileTranslationType === 'videoToDoc') {
+        dest_file = 'docx'
+      }
+      formData.append('dest_file', dest_file)
+
+      const response = await fetch('http://localhost:8000/translate/document', {
         method: 'POST',
         body: formData,
       })
+
       if (!response.ok) {
         const errorData = await response.json()
         console.error('File translation error:', errorData)
         alert('File translation failed.')
         return
       }
-      const data = await response.json()
-      setFileTranslationResult(data.file_translation_text)
+
+      // Use arrayBuffer to ensure binary data is properly read.
+      const arrayBuffer = await response.arrayBuffer()
+      let mimeType = ''
+      if (fileTranslationType === 'pdfToPdf') {
+        mimeType = 'application/pdf'
+      } else {
+        mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      }
+      const fileBlob = new Blob([arrayBuffer], { type: mimeType })
+      const fileURL = window.URL.createObjectURL(fileBlob)
+      setFileTranslationResult(fileURL)
     } catch (error) {
       console.error('File translation error:', error)
       alert('There was a problem with file translation.')
@@ -168,25 +184,26 @@ const TranslatePage: NextPage = () => {
     }
   }
 
-  const handleFileDownload = async () => {
+  const handleFileDownload = () => {
     if (!fileTranslationResult) {
-      alert('No file translation to download.')
+      alert('No file translation available to download.')
       return
     }
-    if (fileTranslationType === 'pdfToPdf') {
-      const a = document.createElement('a')
-      a.href = fileTranslationResult
-      a.download = 'translated_document.pdf'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-    } else {
-      alert('File download not implemented for this file type.')
-    }
+    const a = document.createElement('a')
+    a.href = fileTranslationResult
+    a.download =
+      fileTranslationType === 'pdfToPdf'
+        ? 'translated_document.pdf'
+        : 'translated_document.docx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
   }
 
   const getAcceptedFileTypes = () => {
-    if (fileTranslationType === 'videoToDoc') return 'video/mp4'
+    if (fileTranslationType === 'videoToDoc') {
+      return 'video/mp4'
+    }
     return 'application/pdf'
   }
 
@@ -216,7 +233,7 @@ const TranslatePage: NextPage = () => {
   return (
     <div className="w-full h-full">
       <Header />
-      <Chatbot/>
+      <Chatbot />
       <div className="w-full bg-white mt-4">
         <div className="flex gap-8">
           <div
@@ -334,7 +351,7 @@ const TranslatePage: NextPage = () => {
       {/* FILE TRANSLATION TAB */}
       {activeTab === 'file' && (
         <div className="w-full bg-white rounded-lg shadow p-8 h-[800px] overflow-y-auto">
-          {/* Horizontal bar for file type selection */}
+          {/* File type selection */}
           <div className="flex justify-center mb-4 gap-4">
             <div
               className={`py-3 px-6 border border-[#003459] rounded font-semibold cursor-pointer ${
@@ -369,6 +386,7 @@ const TranslatePage: NextPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
+            {/* Left Column: File input and "From:" language */}
             <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
               <h2 className="text-center text-lg font-semibold mb-4">
                 File translation
@@ -395,7 +413,7 @@ const TranslatePage: NextPage = () => {
                 />
               </div>
 
-              {/* Custom Tailwind dropzone */}
+              {/* File dropzone */}
               <div className="mb-4">
                 <label className="block mb-2 font-semibold text-[#003459]">
                   {fileTranslationType === 'videoToDoc'
@@ -443,12 +461,13 @@ const TranslatePage: NextPage = () => {
               </button>
             </div>
 
+            {/* Right Column: "To:" language and download section */}
             <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
               <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">
-                Translation result
+                Download
               </h2>
 
-              <div className="mb-4 flex-1">
+              <div className="mb-4">
                 <label className="block mb-2 font-semibold text-[#003459]">
                   To:
                 </label>
@@ -467,17 +486,14 @@ const TranslatePage: NextPage = () => {
                   filterOption={filterLanguageOption}
                   isClearable
                 />
-                <div className="mt-4 flex-1">
-                  {fileTranslationResult ? (
-                    <iframe
-                      src={fileTranslationResult}
-                      className="w-full h-full border-0"
-                      title="PDF Preview"
-                    />
-                  ) : (
-                    <p>No preview available.</p>
-                  )}
-                </div>
+              </div>
+
+              <div className="mb-4 flex-1">
+                {fileTranslationResult ? (
+                  <p>Your file is ready for download.</p>
+                ) : (
+                  <p>No file available.</p>
+                )}
               </div>
 
               <button
@@ -485,7 +501,9 @@ const TranslatePage: NextPage = () => {
                 disabled={!fileTranslationResult}
                 className="w-full py-3 bg-gradient-to-r from-purple-700 to-pink-500 text-white font-semibold rounded cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Download PDF
+                {fileTranslationType === 'pdfToPdf'
+                  ? 'Download PDF'
+                  : 'Download DOCX'}
               </button>
             </div>
           </div>
@@ -496,4 +514,3 @@ const TranslatePage: NextPage = () => {
 }
 
 export default TranslatePage
-  
