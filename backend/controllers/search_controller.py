@@ -1,6 +1,7 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from ..services.elasticsearch_service import ElasticSearchService
 import re
+import os
 
 search_router = APIRouter(
     prefix="/search",
@@ -9,17 +10,31 @@ search_router = APIRouter(
 )
 es = ElasticSearchService()
 
+@search_router.post("/resetidx")
+def reset_test_idx():
+    es.create_index()
+
+@search_router.post("/testidx")
+def setup_test_idx():
+    es.reindex()
+
+@search_router.post("/getdoc")
+def get_my_id():
+    es.retrieve_document("my_id")
 
 @search_router.post("/upload")
 def upload(file: UploadFile = File(...)):
     try:
         contents = file.file.read()
-        with open(file.filename, "wb") as f:
+        print(os.getcwd() + "/backend/misc/" + file.filename)
+        with open(os.getcwd() + "/backend/misc/" + file.filename, "wb") as f:
             f.write(contents)
-    except Exception:
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Something went wrong")
     finally:
         file.file.close()
+        es.ingest_document(file.filename)
 
     return {"message": f"Successfully uploaded {file.filename}"}
 
@@ -34,66 +49,67 @@ def handle_search(query: str):
             "must": {
                 "multi_match": {
                     "query": parsed_query,
-                    "fields": ["name", "summary", "content"],
+                    #"fields": ["name", "summary", "content"],
+                    "fields": ["attachment.content"]
                 }
             }
         }
     else:
         search_query = {"must": {"match_all": {}}}
-
     results = es.search(
         query={"bool": {**search_query, **filters}},
-        knn={
-            "field": "embedding",
-            "query_vector": es.get_embedding(parsed_query),
-            "k": 10,
-            "num_candidates": 50,
-            **filters,
-        },
-        rank={"rrf": {}},
-        aggs={
-            "category-agg": {
-                "terms": {
-                    "field": "category.keyword",
-                }
-            },
-            "year-agg": {
-                "date_histogram": {
-                    "field": "updated_at",
-                    "calendar_interval": "year",
-                    "format": "yyyy",
-                },
-            },
-        },
+        # knn={
+        #     "field": "embedding",
+        #     "query_vector": es.get_embedding(parsed_query),
+        #     "k": 10,
+        #     "num_candidates": 50,
+        #     **filters,
+        # },
+        # rank={"rrf": {}},
+        # aggs={
+        #     "category-agg": {
+        #         "terms": {
+        #             "field": "category.keyword",
+        #         }
+        #     },
+        #     "year-agg": {
+        #         "date_histogram": {
+        #             "field": "updated_at",
+        #             "calendar_interval": "year",
+        #             "format": "yyyy",
+        #         },
+        #     },
+        # },
         size=5,
         from_=from_,
     )
-    aggs = {
-        "Category": {
-            bucket["key"]: bucket["doc_count"]
-            for bucket in results["aggregations"]["category-agg"]["buckets"]
-        },
-        "Year": {
-            bucket["key_as_string"]: bucket["doc_count"]
-            for bucket in results["aggregations"]["year-agg"]["buckets"]
-            if bucket["doc_count"] > 0
-        },
-    }
+    # aggs = {
+    #     "Category": {
+    #         bucket["key"]: bucket["doc_count"]
+    #         for bucket in results["aggregations"]["category-agg"]["buckets"]
+    #     },
+    #     "Year": {
+    #         bucket["key_as_string"]: bucket["doc_count"]
+    #         for bucket in results["aggregations"]["year-agg"]["buckets"]
+    #         if bucket["doc_count"] > 0
+    #     },
+    #}
     return {
         "results": results["hits"]["hits"],
         "query": query,
         "from_": from_,
         "total": results["hits"]["total"]["value"],
-        "aggs": aggs,
+        # "aggs": aggs,
     }
 
 
 @search_router.get("/documents/{doc_id}")
 async def retrieve_document(doc_id: str):
     document = es.retrieve_document(doc_id)
-    title = document["_source"]["name"]
-    paragraphs = document["_source"]["content"].split("\n")
-    return {"title": title, "paragraphs": paragraphs}
+    return document
+    # title = document["_source"]["name"]
+    # paragraphs = document["_source"]["content"].split("\n")
+    # return {"title": title, "paragraphs": paragraphs}
 
 
 def extract_filters(query):
