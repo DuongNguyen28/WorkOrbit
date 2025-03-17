@@ -11,6 +11,7 @@ contourpy
 cycler
 decorator
 dnspython
+elasticsearch
 email_validator
 exceptiongroup
 elasticsearch
@@ -105,8 +106,8 @@ uvloop; platform_system != "Windows"
 watchfiles
 websockets
 zipp
-# langchain_community.document_loaders
-# langchain.schema 
+langchain_community.document_loaders
+langchain.schema 
 langchain_openai
 langchain_chroma 
 langchain_openai
