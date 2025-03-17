@@ -24,6 +24,7 @@ fsspec
 google
 google-api-core
 google-auth
+google-cloud
 google-cloud-core
 google-cloud-storage
 google-cloud-translate
@@ -102,12 +103,12 @@ typing_extensions
 tzdata
 urllib3
 uvicorn
-uvloop; platform_system != "Windows"
+uvloop
 watchfiles
 websockets
 zipp
-langchain_community.document_loaders
-langchain.schema 
+# langchain_community.document_loaders
+# langchain.schema 
 langchain_openai
 langchain_chroma 
 langchain_openai

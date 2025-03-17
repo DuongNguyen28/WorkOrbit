@@ -75,3 +75,5 @@ docs/
 
 # Ignore macOS-specific files
 .DS_Store
+
+serviceAccountKey.json

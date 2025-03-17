@@ -24,6 +24,7 @@ class PdfToPdfTranslationService:
                 local_file_path=output_path,
                 destination_blob_name=f"translated_pdfs/{os.path.basename(output_path)}"
             )
+            print(gcs_file_link)
             
             return {"message": "Translation successful", "file_link": output_path}
         else:
