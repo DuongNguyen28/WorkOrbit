@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, FastAPI, HTTPException, status
 from pydantic import BaseModel
 from services.firebase_service import get_db
 import bcrypt
 import uuid
 
+app = FastAPI()
 auth_router = APIRouter()
 
 class UserRegister(BaseModel):
