@@ -1,6 +1,6 @@
 from fastapi import APIRouter, FastAPI, HTTPException, status
 from pydantic import BaseModel
-from services.firebase_service import get_db
+from ..services.firebase_service import get_db
 import bcrypt
 import uuid
 
@@ -24,7 +24,7 @@ async def register(user: UserRegister):
     users_ref = db.collection("users")
 
     # Check if the user already exists
-    existing = users_ref.where("email", "=", user.email).limit(1).get()
+    existing = users_ref.where("email", "==", user.email).limit(1).get()
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists.")
     
