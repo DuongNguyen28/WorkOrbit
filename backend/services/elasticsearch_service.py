@@ -16,7 +16,8 @@ class ElasticSearchService:
         self.model = SentenceTransformer(
             "all-MiniLM-L6-v2"
         )  # light-weight embedded model, k can gpu
-        self.es = Elasticsearch("http://localhost:9200")  # thay vao env
+        es_url = os.getenv("ES_URL")
+        self.es = Elasticsearch(es_url)  # thay vao env
         client_info = self.es.info()
         print("Connected to Elastic search")
         pprint(client_info.body)
