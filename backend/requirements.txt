@@ -119,3 +119,7 @@ chromadb
 langchain-community
 tiktoken
 unstructured[md]
+sqlalchemy
+passlib
+python-jose
+psycopg2-binary>=2.9

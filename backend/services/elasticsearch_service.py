@@ -18,9 +18,7 @@ class ElasticSearchService:
         )  # light-weight embedded model, k can gpu
         es_url = os.getenv("ES_URL")
         self.es = Elasticsearch(es_url)  # thay vao env
-        client_info = self.es.info()
         print("Connected to Elastic search")
-        pprint(client_info.body)
 
     def create_index(self):
         self.es.indices.delete(index="idx", ignore_unavailable=True)
