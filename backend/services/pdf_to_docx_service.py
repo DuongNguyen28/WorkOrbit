@@ -65,7 +65,8 @@ class PdfToDocxTranslatorService:
 
     async def process_file(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         """Determine file type, detect language, and process accordingly."""
-        # output_path = f"{input_path}_{src_language}-{dest_language}_{int(time.time())}.pdf"
+        output_path = f"{src_language}-{dest_language}_{int(time.time())}.docx"
+        output_path = os.path.join(os.getcwd(), "backend/misc", output_path)
         if input_path.endswith('.pdf'):
             warnings = await self.translate_pdf(input_path, output_path, src_language, dest_language)
             

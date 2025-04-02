@@ -67,6 +67,8 @@ class ElasticSearchService:
         with open(file_path, "rb") as pdf_file:
             enc_file = base64.b64encode(pdf_file.read()).decode("utf-8")
 
+        url = self.upload_file(file_path, file_type)
+
         resp = self.es.ingest.put_pipeline(
             id="attachment",
             description="Extract attachment information",
@@ -85,8 +87,6 @@ class ElasticSearchService:
             document={"data": enc_file},
         )
 
-        url = self.upload_file(file_path, file_type)
-        print(f"Uploaded to Cloud Storage at link: {url}")
         return url
         # resp2 = self.es.get(
         #     index="idx",
