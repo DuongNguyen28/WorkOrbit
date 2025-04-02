@@ -20,6 +20,7 @@ def get_my_id():
 
 @search_router.post("/upload")
 def upload(file: UploadFile = File(...)):
+    url = ""
     try:
         contents = file.file.read()
         print(os.getcwd() + "/backend/misc/" + file.filename)
@@ -30,9 +31,12 @@ def upload(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail="Something went wrong")
     finally:
         file.file.close()
-        es.ingest_document(file.filename)
+        url = es.ingest_document(file.filename)
 
-    return {"message": f"Successfully uploaded {file.filename}"}
+    return {
+        "message": f"Successfully uploaded {file.filename}",
+        "gcs_url": url
+    }
 
 
 @search_router.post("/")
