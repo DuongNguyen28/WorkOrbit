@@ -3,13 +3,13 @@ from pprint import pprint
 import os
 import time
 import base64
-
+from io import BytesIO
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from sentence_transformers import SentenceTransformer
+from ..services.gcs_upload_service import GCSFileUploadService
 
 load_dotenv()
-
 
 class ElasticSearchService:
     def __init__(self):
@@ -57,10 +57,15 @@ class ElasticSearchService:
     def retrieve_document(self, id):
         return self.es.get(index="idx", id=id)
 
-    def ingest_document(self, filename):
-        with open(os.getcwd() + "/backend/misc/"+filename, "rb") as pdf_file:
+    def ingest_document(self, filename, file_type="uncategorized"):
+        if filename[0] != "/":
+            file_path = os.path.join(os.getcwd(), "backend/misc", filename)
+        else:
+            file_path = filename
+
+
+        with open(file_path, "rb") as pdf_file:
             enc_file = base64.b64encode(pdf_file.read()).decode("utf-8")
-            #print(enc_file)
 
         resp = self.es.ingest.put_pipeline(
             id="attachment",
@@ -71,7 +76,7 @@ class ElasticSearchService:
                 "remove_binary": True
                 }}],
         )
-        #print(resp)
+        print(resp)
 
         resp1 = self.es.index(
             index="idx",
@@ -79,10 +84,19 @@ class ElasticSearchService:
             pipeline="attachment",
             document={"data": enc_file},
         )
-        print(resp1)
 
+        url = self.upload_file(file_path, file_type)
+        print(f"Uploaded to Cloud Storage at link: {url}")
+        return url
         # resp2 = self.es.get(
         #     index="idx",
         #     # id="my_id",
         # )
         # print(resp2)
+    
+    def upload_file(self, file_path, file_type):
+        gcs_path = f"{file_type}/{os.path.basename(file_path)}"
+        uploader = GCSFileUploadService()
+        gcs_url = uploader.upload_file(file_path, gcs_path)
+
+        return gcs_url

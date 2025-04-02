@@ -1,7 +1,7 @@
 import pymupdf
 from .translate_client import TranslateClient
 from ..services.language_detection_service import LanguageDetectionService
-from ..services.gcs_upload_service import GCSFileUploadService
+from ..services.elasticsearch_service import ElasticSearchService
 import time
 import os
 
@@ -9,29 +9,24 @@ class PdfToPdfTranslationService:
     def __init__(self):
         self.translate_client = TranslateClient()
         self.language_service = LanguageDetectionService()
-        self.gcs_uploader = GCSFileUploadService("workorbit")
     
     async def process_file(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         """Determine file type, detect language, and process accordingly."""
         output_path = f"{src_language}-{dest_language}_{int(time.time())}.pdf"
+        output_path = os.path.join(os.getcwd(), "backend/misc", output_path)
         if input_path.endswith('.pdf'):
             warnings = await self.translate_pdf(input_path, output_path, src_language, dest_language)
             
             if warnings:
                 return {"error": warnings}
 
-            gcs_file_link = self.gcs_uploader.upload_file(
-                local_file_path=output_path,
-                destination_blob_name=f"translated_pdfs/{os.path.basename(output_path)}"
-            )
-            print(gcs_file_link)
+            es = ElasticSearchService()
+            es.ingest_document(input_path, "pdf")
+            es.ingest_document(output_path, "translated_pdf")
             
             return {"message": "Translation successful", "file_link": output_path}
         else:
             raise ValueError("Unsupported file format.")
-
-        
-
 
     async def translate_pdf(self, input_path: str, output_path: str, src_language: str, dest_language: str):
         doc = pymupdf.open(input_path)
