@@ -122,4 +122,5 @@ unstructured[md]
 sqlalchemy
 passlib
 python-jose
-psycopg2-binary>=2.9
+psycopg2
+psycopg2-binary
