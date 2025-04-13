@@ -82,17 +82,12 @@ class ElasticSearchService:
 
         resp1 = self.es.index(
             index="idx",
-            # id="my_id",
             pipeline="attachment",
             document={"data": enc_file},
         )
+        print(resp1)
 
         return url
-        # resp2 = self.es.get(
-        #     index="idx",
-        #     # id="my_id",
-        # )
-        # print(resp2)
     
     def upload_file(self, file_path, file_type):
         gcs_path = f"{file_type}/{os.path.basename(file_path)}"
