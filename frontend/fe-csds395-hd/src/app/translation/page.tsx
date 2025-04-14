@@ -33,6 +33,11 @@ const TranslatePage: NextPage = () => {
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    setFileTranslationResult('')
+  }, [fileTranslationType])
+
+
   const [isMounted, setIsMounted] = useState(false)
   useEffect(() => {
     setIsMounted(true)
@@ -110,55 +115,50 @@ const TranslatePage: NextPage = () => {
 
   const handleFileTranslate = async () => {
     if (!fileToTranslate || !fileSourceLang || !fileTargetLang) {
-      alert('Please select a file and both languages before translating.');
-      return;
+      alert('Please select a file and both languages before translating.')
+      return
     }
-    setIsFileLoading(true);
-    setFileTranslationResult('');
+    setIsFileLoading(true)
+    setFileTranslationResult('')
     try {
-      const formData = new FormData();
-      formData.append('file', fileToTranslate);
-      formData.append('src_language', fileSourceLang.code);
-      formData.append('dest_language', fileTargetLang.code);
-  
-      let endpoint = '';
+      const formData = new FormData()
+      formData.append('file', fileToTranslate)
+      formData.append('src_language', fileSourceLang.code)
+      formData.append('dest_language', fileTargetLang.code)
+
+      let endpoint = ''
       if (fileTranslationType === 'videoToDoc') {
-        endpoint = 'http://localhost:8000/translate/video';
+        endpoint = 'http://localhost:8000/translate/video'
       } else {
-        endpoint = 'http://localhost:8000/translate/document';
-        let dest_file = '';
-        if (fileTranslationType === 'pdfToDocx') dest_file = 'docx';
-        else if (fileTranslationType === 'pdfToPdf') dest_file = 'pdf';
-        formData.append('dest_file', dest_file);
+        endpoint = 'http://localhost:8000/translate/document'
+        let dest_file = ''
+        if (fileTranslationType === 'pdfToDocx') dest_file = 'docx'
+        else if (fileTranslationType === 'pdfToPdf') dest_file = 'pdf'
+        formData.append('dest_file', dest_file)
       }
-  
+
       const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('File translation error:', errorData);
-        alert('File translation failed: ' + (errorData.message || 'Unknown error'));
-        return;
-      }
-  
-      const contentType = response.headers.get('Content-Type');
-      const expectedContentType = fileTranslationType === 'pdfToPdf'
-        ? 'application/pdf'
-        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      })
 
-      let fileBlob = await response.blob();
-      const fileURL = window.URL.createObjectURL(fileBlob);
-      setFileTranslationResult(fileURL);
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('File translation error:', errorData)
+        alert('File translation failed: ' + (errorData.message || 'Unknown error'))
+        return
+      }
+
+      const fileBlob = await response.blob()
+      const fileURL = window.URL.createObjectURL(fileBlob)
+      setFileTranslationResult(fileURL)
     } catch (error) {
-      console.error('File translation error:', error);
-      alert('There was a problem with file translation.');
+      console.error('File translation error:', error)
+      alert('There was a problem with file translation.')
     } finally {
-      setIsFileLoading(false);
+      setIsFileLoading(false)
     }
-  };
+  }
 
   const handleFileDownload = () => {
     if (!fileTranslationResult) {
@@ -201,23 +201,19 @@ const TranslatePage: NextPage = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen w-screen">
       <Header />
       <Chatbot />
       <div className="w-full bg-white mt-4">
         <div className="flex gap-8">
           <div
-            className={`w-1/2 py-4 px-6 text-center font-semibold cursor-pointer transition-all duration-200 ${
-              activeTab === 'text' ? 'bg-[#003459] text-white' : 'bg-white'
-            }`}
+            className={`w-1/2 py-4 px-6 text-center font-semibold cursor-pointer transition-all duration-200 ${activeTab === 'text' ? 'bg-[#003459] text-white' : 'bg-white'}`}
             onClick={() => setActiveTab('text')}
           >
             Text Translation
           </div>
           <div
-            className={`w-1/2 py-3 px-6 text-center font-semibold cursor-pointer transition-all duration-200 ${
-              activeTab === 'file' ? 'bg-[#003459] text-white' : 'bg-white'
-            }`}
+            className={`w-1/2 py-3 px-6 text-center font-semibold cursor-pointer transition-all duration-200 ${activeTab === 'file' ? 'bg-[#003459] text-white' : 'bg-white'}`}
             onClick={() => setActiveTab('file')}
           >
             File Translation
@@ -258,7 +254,7 @@ const TranslatePage: NextPage = () => {
                 <button
                   onClick={handleTranslate}
                   disabled={isLoading}
-                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded-2xl cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Translating...' : 'Translate'}
                 </button>
@@ -292,9 +288,9 @@ const TranslatePage: NextPage = () => {
                 <button
                   onClick={handleDownload}
                   disabled={!translatedText}
-                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#00A7E1] text-white font-semibold rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  Convert to File (docx)
+                  Download
                 </button>
               </div>
             </div>
@@ -305,25 +301,19 @@ const TranslatePage: NextPage = () => {
           <div className="w-full bg-white rounded-lg shadow p-8 h-full overflow-y-auto">
             <div className="flex justify-center mb-4 gap-4">
               <div
-                className={`py-3 px-6 border border-[#003459] rounded font-semibold cursor-pointer ${
-                  fileTranslationType === 'videoToDoc' ? 'bg-[#003459] text-white' : 'bg-white'
-                }`}
+                className={`py-3 px-6 border border-[#003459] rounded font-semibold cursor-pointer ${fileTranslationType === 'videoToDoc' ? 'bg-[#003459] text-white' : 'bg-white'}`}
                 onClick={() => setFileTranslationType('videoToDoc')}
               >
                 Video to docx
               </div>
               <div
-                className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${
-                  fileTranslationType === 'pdfToDocx' ? 'bg-[#003459] text-white' : 'bg-white'
-                }`}
+                className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${fileTranslationType === 'pdfToDocx' ? 'bg-[#003459] text-white' : 'bg-white'}`}
                 onClick={() => setFileTranslationType('pdfToDocx')}
               >
                 PDF to docx
               </div>
               <div
-                className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${
-                  fileTranslationType === 'pdfToPdf' ? 'bg-[#003459] text-white' : 'bg-white'
-                }`}
+                className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${fileTranslationType === 'pdfToPdf' ? 'bg-[#003459] text-white' : 'bg-white'}`}
                 onClick={() => setFileTranslationType('pdfToPdf')}
               >
                 PDF to PDF
@@ -355,9 +345,7 @@ const TranslatePage: NextPage = () => {
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     onClick={handleClickDropzone}
-                    className={`flex flex-col items-center justify-center border-2 border-dashed p-6 rounded cursor-pointer transition-all duration-200 ${
-                      dragActive ? 'border-blue-500' : 'border-gray-300'
-                    } h-64`}
+                    className={`flex flex-col items-center justify-center border-2 border-dashed p-6 rounded cursor-pointer transition-all duration-200 ${dragActive ? 'border-blue-500' : 'border-gray-300'} h-64`}
                   >
                     <input
                       type="file"
@@ -384,7 +372,7 @@ const TranslatePage: NextPage = () => {
                 <button
                   onClick={handleFileTranslate}
                   disabled={isFileLoading}
-                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded-2xl cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isFileLoading ? 'Translating...' : 'Translate File'}
                 </button>
@@ -415,7 +403,7 @@ const TranslatePage: NextPage = () => {
                 <button
                   onClick={handleFileDownload}
                   disabled={!fileTranslationResult}
-                  className="w-full py-3 bg-gradient-to-r from-purple-700 to-pink-500 text-white font-semibold rounded cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#00A7E1] text-white font-semibold rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {fileTranslationType === 'pdfToPdf' ? 'Download PDF' : 'Download DOCX'}
                 </button>
