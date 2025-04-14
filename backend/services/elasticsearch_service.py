@@ -57,7 +57,11 @@ class ElasticSearchService:
     def retrieve_document(self, id):
         return self.es.get(index="idx", id=id)
 
-    def ingest_document(self, filename, file_type="uncategorized"):
+    def ingest_document(self, filename, file_type=None):
+        if file_type is None:
+            _, ext = os.path.splitext(filename)
+            file_type = ext.lstrip('.').lower() if ext else "uncategorized"
+
         if filename[0] != "/":
             file_path = os.path.join(os.getcwd(), "backend/misc", filename)
         else:
@@ -84,7 +88,8 @@ class ElasticSearchService:
             index="idx",
             # id="my_id",
             pipeline="attachment",
-            document={"data": enc_file},
+            document={"data": enc_file,
+                      "file_type": file_type},
         )
 
         return url
