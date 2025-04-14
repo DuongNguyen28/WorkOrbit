@@ -5,7 +5,6 @@ import type { NextPage } from 'next'
 import Select, { SingleValue } from 'react-select'
 import languages from '@/data/languages.json'
 
-// Import your header component
 import Header from '@components/header/Header'
 import Chatbot from '@components/header/Chatbot'
 
@@ -17,21 +16,14 @@ interface LanguageOption {
 const languageOptions: LanguageOption[] = languages
 
 const TranslatePage: NextPage = () => {
-  // Tab state
   const [activeTab, setActiveTab] = useState<'text' | 'file'>('text')
-
-  // --- Text Translation states ---
   const [sourceLang, setSourceLang] = useState<LanguageOption | null>(null)
   const [targetLang, setTargetLang] = useState<LanguageOption | null>(null)
   const [originalText, setOriginalText] = useState('')
   const [translatedText, setTranslatedText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  // --- File Translation states ---
-  // Supported types: 'pdfToDocx', 'pdfToPdf', and 'videoToDoc'
-  const [fileTranslationType, setFileTranslationType] = useState<
-    'videoToDoc' | 'pdfToDocx' | 'pdfToPdf'
-  >('pdfToDocx')
+  const [fileTranslationType, setFileTranslationType] = useState<'videoToDoc' | 'pdfToDocx' | 'pdfToPdf'>('pdfToDocx')
   const [fileSourceLang, setFileSourceLang] = useState<LanguageOption | null>(null)
   const [fileTargetLang, setFileTargetLang] = useState<LanguageOption | null>(null)
   const [fileToTranslate, setFileToTranslate] = useState<File | null>(null)
@@ -57,7 +49,6 @@ const TranslatePage: NextPage = () => {
     return label.includes(search) || code.includes(search)
   }
 
-  // --- Text Translation Handlers ---
   const handleTranslate = async () => {
     if (!sourceLang || !targetLang || !originalText) {
       alert('Please select both languages and enter some text.')
@@ -65,7 +56,6 @@ const TranslatePage: NextPage = () => {
     }
     setIsLoading(true)
     setTranslatedText('')
-
     try {
       const response = await fetch('http://localhost:8000/translate/text', {
         method: 'POST',
@@ -76,12 +66,7 @@ const TranslatePage: NextPage = () => {
           dest_lang: targetLang.code,
         }),
       })
-
-      if (!response.ok) {
-        throw new Error(
-          `Server error: ${response.status} - ${response.statusText}`
-        )
-      }
+      if (!response.ok) throw new Error(`Server error: ${response.status} - ${response.statusText}`)
       const data = await response.json()
       setTranslatedText(data.translated_text)
     } catch (error) {
@@ -97,21 +82,18 @@ const TranslatePage: NextPage = () => {
       alert('No translated text to convert. Please translate something first.')
       return
     }
-
     try {
       const response = await fetch('http://localhost:8000/save-text-to-doc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: translatedText }),
       })
-
       if (!response.ok) {
         const errorData = await response.json()
         console.error('Error:', errorData)
         alert('Failed to convert text to .docx.')
         return
       }
-
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -126,54 +108,54 @@ const TranslatePage: NextPage = () => {
     }
   }
 
-  // --- File Translation Handlers ---
   const handleFileTranslate = async () => {
     if (!fileToTranslate || !fileSourceLang || !fileTargetLang) {
       alert('Please select a file and both languages before translating.')
       return
     }
-
     setIsFileLoading(true)
     setFileTranslationResult('')
-
     try {
       const formData = new FormData()
       formData.append('file', fileToTranslate)
       formData.append('src_language', fileSourceLang.code)
       formData.append('dest_language', fileTargetLang.code)
-
-      // Set dest_file based on selected translation type.
       let dest_file = ''
-      if (fileTranslationType === 'pdfToDocx') {
-        dest_file = 'docx'
-      } else if (fileTranslationType === 'pdfToPdf') {
-        dest_file = 'pdf'
-      } else if (fileTranslationType === 'videoToDoc') {
-        dest_file = 'docx'
-      }
+      if (fileTranslationType === 'pdfToDocx') dest_file = 'docx'
+      else if (fileTranslationType === 'pdfToPdf') dest_file = 'pdf'
+      else if (fileTranslationType === 'videoToDoc') dest_file = 'docx'
       formData.append('dest_file', dest_file)
-
       const response = await fetch('http://localhost:8000/translate/document', {
         method: 'POST',
         body: formData,
       })
-
       if (!response.ok) {
         const errorData = await response.json()
         console.error('File translation error:', errorData)
-        alert('File translation failed.')
+        alert('File translation failed: ' + (errorData.message || 'Unknown error'))
         return
       }
-
-      // Use arrayBuffer to ensure binary data is properly read.
-      const arrayBuffer = await response.arrayBuffer()
-      let mimeType = ''
-      if (fileTranslationType === 'pdfToPdf') {
-        mimeType = 'application/pdf'
-      } else {
-        mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      const contentType = response.headers.get('Content-Type')
+      const expectedContentType = fileTranslationType === 'pdfToPdf'
+        ? 'application/pdf'
+        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      if (!contentType || !contentType.includes(expectedContentType)) {
+        const text = await response.text()
+        console.error('Unexpected Content-Type:', contentType, 'Response:', text)
+        alert('Error: ' + text)
+        return
       }
-      const fileBlob = new Blob([arrayBuffer], { type: mimeType })
+      const arrayBuffer = await response.arrayBuffer()
+      if (fileTranslationType === 'pdfToPdf') {
+        const uint8Array = new Uint8Array(arrayBuffer.slice(0, 5))
+        const header = String.fromCharCode(...uint8Array)
+        if (header !== '%PDF-') {
+          console.error('Not a valid PDF, header:', header)
+          alert('Error: Received file is not a valid PDF')
+          return
+        }
+      }
+      const fileBlob = new Blob([arrayBuffer], { type: expectedContentType })
       const fileURL = window.URL.createObjectURL(fileBlob)
       setFileTranslationResult(fileURL)
     } catch (error) {
@@ -191,23 +173,17 @@ const TranslatePage: NextPage = () => {
     }
     const a = document.createElement('a')
     a.href = fileTranslationResult
-    a.download =
-      fileTranslationType === 'pdfToPdf'
-        ? 'translated_document.pdf'
-        : 'translated_document.docx'
+    a.download = fileTranslationType === 'pdfToPdf' ? 'translated_document.pdf' : 'translated_document.docx'
     document.body.appendChild(a)
     a.click()
     a.remove()
   }
 
   const getAcceptedFileTypes = () => {
-    if (fileTranslationType === 'videoToDoc') {
-      return 'video/mp4'
-    }
+    if (fileTranslationType === 'videoToDoc') return 'video/mp4'
     return 'application/pdf'
   }
 
-  // Handlers for the custom dropzone (native drag and drop)
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setDragActive(true)
@@ -231,7 +207,7 @@ const TranslatePage: NextPage = () => {
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="flex flex-col min-h-screen">
       <Header />
       <Chatbot />
       <div className="w-full bg-white mt-4">
@@ -255,260 +231,205 @@ const TranslatePage: NextPage = () => {
         </div>
       </div>
 
-      {/* TEXT TRANSLATION TAB */}
-      {activeTab === 'text' && (
-        <div className="w-full bg-white rounded-lg shadow p-8 h-[600px] overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full">
-              <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">
-                Text translation
-              </h2>
-
-              <div className="mb-4">
-                <label className="block mb-2 font-semibold text-[#003459]">
-                  From:
-                </label>
-                <Select
-                  instanceId="source-language-select"
-                  options={languageOptions}
-                  value={sourceLang}
-                  onChange={(option: SingleValue<LanguageOption>) =>
-                    setSourceLang(option)
-                  }
-                  placeholder="Input language"
-                  getOptionLabel={(option) =>
-                    `${option.label} (${option.code})`
-                  }
-                  getOptionValue={(option) => option.code}
-                  filterOption={filterLanguageOption}
-                  isClearable
-                />
-              </div>
-
-              <div className="mb-4 flex-1">
-                <label className="block mb-2 font-semibold text-[#003459]">
-                  Type text here
-                </label>
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded resize-vertical h-full"
-                  value={originalText}
-                  onChange={(e) => setOriginalText(e.target.value)}
-                />
-              </div>
-
-              <button
-                onClick={handleTranslate}
-                disabled={isLoading}
-                className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Translating...' : 'Translate'}
-              </button>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
-              <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">
-                Translation result
-              </h2>
-
-              <div className="mb-4 flex-1">
-                <label className="block mb-2 font-semibold text-[#003459]">
-                  To:
-                </label>
-                <Select
-                  instanceId="target-language-select"
-                  options={languageOptions}
-                  value={targetLang}
-                  onChange={(option: SingleValue<LanguageOption>) =>
-                    setTargetLang(option)
-                  }
-                  placeholder="Output language"
-                  getOptionLabel={(option) =>
-                    `${option.label} (${option.code})`
-                  }
-                  getOptionValue={(option) => option.code}
-                  filterOption={filterLanguageOption}
-                  isClearable
-                />
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded resize-vertical mt-4 min-h-[300px]"
-                  value={translatedText}
-                  readOnly
-                />
-              </div>
-
-              <button
-                onClick={handleDownload}
-                disabled={!translatedText}
-                className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                Convert to File (docx)
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* FILE TRANSLATION TAB */}
-      {activeTab === 'file' && (
-        <div className="w-full bg-white rounded-lg shadow p-8 h-[800px] overflow-y-auto">
-          {/* File type selection */}
-          <div className="flex justify-center mb-4 gap-4">
-            <div
-              className={`py-3 px-6 border border-[#003459] rounded font-semibold cursor-pointer ${
-                fileTranslationType === 'videoToDoc'
-                  ? 'bg-[#003459] text-white'
-                  : 'bg-white'
-              }`}
-              onClick={() => setFileTranslationType('videoToDoc')}
-            >
-              Video to docx
-            </div>
-            <div
-              className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${
-                fileTranslationType === 'pdfToDocx'
-                  ? 'bg-[#003459] text-white'
-                  : 'bg-white'
-              }`}
-              onClick={() => setFileTranslationType('pdfToDocx')}
-            >
-              PDF to docx
-            </div>
-            <div
-              className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${
-                fileTranslationType === 'pdfToPdf'
-                  ? 'bg-[#003459] text-white'
-                  : 'bg-white'
-              }`}
-              onClick={() => setFileTranslationType('pdfToPdf')}
-            >
-              PDF to PDF
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-            {/* Left Column: File input and "From:" language */}
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
-              <h2 className="text-center text-lg font-semibold mb-4">
-                File translation
-              </h2>
-
-              <div className="mb-4">
-                <label className="block mb-2 font-semibold text-[#003459]">
-                  From:
-                </label>
-                <Select
-                  instanceId="file-source-language-select"
-                  options={languageOptions}
-                  value={fileSourceLang}
-                  onChange={(option: SingleValue<LanguageOption>) =>
-                    setFileSourceLang(option)
-                  }
-                  placeholder="Input language"
-                  getOptionLabel={(option) =>
-                    `${option.label} (${option.code})`
-                  }
-                  getOptionValue={(option) => option.code}
-                  filterOption={filterLanguageOption}
-                  isClearable
-                />
-              </div>
-
-              {/* File dropzone */}
-              <div className="mb-4">
-                <label className="block mb-2 font-semibold text-[#003459]">
-                  {fileTranslationType === 'videoToDoc'
-                    ? 'Choose .mp4 file'
-                    : 'Choose .pdf file'}
-                </label>
-                <div
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={handleClickDropzone}
-                  className={`flex flex-col items-center justify-center border-2 border-dashed p-6 rounded cursor-pointer transition-all duration-200 ${
-                    dragActive ? 'border-blue-500' : 'border-gray-300'
-                  } h-64`}
-                >
-                  <input
-                    type="file"
-                    accept={getAcceptedFileTypes()}
-                    ref={fileInputRef}
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        setFileToTranslate(e.target.files[0])
-                      }
-                    }}
-                    className="hidden"
+      <div className="flex-grow">
+        {activeTab === 'text' && (
+          <div className="w-full bg-white rounded-lg shadow p-8 h-full overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
+              <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full">
+                <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">
+                  Text translation
+                </h2>
+                <div className="mb-4">
+                  <label className="block mb-2 font-semibold text-[#003459]">From:</label>
+                  <Select
+                    instanceId="source-language-select"
+                    options={languageOptions}
+                    value={sourceLang}
+                    onChange={(option: SingleValue<LanguageOption>) => setSourceLang(option)}
+                    placeholder="Input language"
+                    getOptionLabel={(option) => `${option.label} (${option.code})`}
+                    getOptionValue={(option) => option.code}
+                    filterOption={filterLanguageOption}
+                    isClearable
                   />
-                  {fileToTranslate ? (
-                    <p>{fileToTranslate.name}</p>
+                </div>
+                <div className="mb-4 flex-1">
+                  <label className="block mb-2 font-semibold text-[#003459]">Type text here</label>
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded resize-vertical min-h-[300px]"
+                    value={originalText}
+                    onChange={(e) => setOriginalText(e.target.value)}
+                  />
+                </div>
+                <button
+                  onClick={handleTranslate}
+                  disabled={isLoading}
+                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Translating...' : 'Translate'}
+                </button>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
+                <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">
+                  Translation result
+                </h2>
+                <div className="mb-4">
+                  <label className="block mb-2 font-semibold text-[#003459]">To:</label>
+                  <Select
+                    instanceId="target-language-select"
+                    options={languageOptions}
+                    value={targetLang}
+                    onChange={(option: SingleValue<LanguageOption>) => setTargetLang(option)}
+                    placeholder="Output language"
+                    getOptionLabel={(option) => `${option.label} (${option.code})`}
+                    getOptionValue={(option) => option.code}
+                    filterOption={filterLanguageOption}
+                    isClearable
+                  />
+                </div>
+                <div className="mb-4 flex-1">
+                  <label className="block mb-2 font-semibold text-[#003459]">Result</label>
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded resize-vertical min-h-[300px]"
+                    value={translatedText}
+                    readOnly
+                  />
+                </div>
+                <button
+                  onClick={handleDownload}
+                  disabled={!translatedText}
+                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  Convert to File (docx)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'file' && (
+          <div className="w-full bg-white rounded-lg shadow p-8 h-full overflow-y-auto">
+            <div className="flex justify-center mb-4 gap-4">
+              <div
+                className={`py-3 px-6 border border-[#003459] rounded font-semibold cursor-pointer ${
+                  fileTranslationType === 'videoToDoc' ? 'bg-[#003459] text-white' : 'bg-white'
+                }`}
+                onClick={() => setFileTranslationType('videoToDoc')}
+              >
+                Video to docx
+              </div>
+              <div
+                className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${
+                  fileTranslationType === 'pdfToDocx' ? 'bg-[#003459] text-white' : 'bg-white'
+                }`}
+                onClick={() => setFileTranslationType('pdfToDocx')}
+              >
+                PDF to docx
+              </div>
+              <div
+                className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${
+                  fileTranslationType === 'pdfToPdf' ? 'bg-[#003459] text-white' : 'bg-white'
+                }`}
+                onClick={() => setFileTranslationType('pdfToPdf')}
+              >
+                PDF to PDF
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
+              <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
+                <h2 className="text-center text-lg font-semibold mb-4">File translation</h2>
+                <div className="mb-4">
+                  <label className="block mb-2 font-semibold text-[#003459]">From:</label>
+                  <Select
+                    instanceId="file-source-language-select"
+                    options={languageOptions}
+                    value={fileSourceLang}
+                    onChange={(option: SingleValue<LanguageOption>) => setFileSourceLang(option)}
+                    placeholder="Input language"
+                    getOptionLabel={(option) => `${option.label} (${option.code})`}
+                    getOptionValue={(option) => option.code}
+                    filterOption={filterLanguageOption}
+                    isClearable
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2 font-semibold text-[#003459]">
+                    {fileTranslationType === 'videoToDoc' ? 'Choose .mp4 file' : 'Choose .pdf file'}
+                  </label>
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={handleClickDropzone}
+                    className={`flex flex-col items-center justify-center border-2 border-dashed p-6 rounded cursor-pointer transition-all duration-200 ${
+                      dragActive ? 'border-blue-500' : 'border-gray-300'
+                    } h-64`}
+                  >
+                    <input
+                      type="file"
+                      accept={getAcceptedFileTypes()}
+                      ref={fileInputRef}
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setFileToTranslate(e.target.files[0])
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    {fileToTranslate ? (
+                      <p>{fileToTranslate.name}</p>
+                    ) : (
+                      <p>
+                        {fileTranslationType === 'videoToDoc'
+                          ? 'Drag and drop a .mp4 file here, or click to select one'
+                          : 'Drag and drop a .pdf file here, or click to select one'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={handleFileTranslate}
+                  disabled={isFileLoading}
+                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isFileLoading ? 'Translating...' : 'Translate File'}
+                </button>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
+                <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">Download</h2>
+                <div className="mb-4">
+                  <label className="block mb-2 font-semibold text-[#003459]">To:</label>
+                  <Select
+                    instanceId="file-target-language-select"
+                    options={languageOptions}
+                    value={fileTargetLang}
+                    onChange={(option: SingleValue<LanguageOption>) => setFileTargetLang(option)}
+                    placeholder="Output language"
+                    getOptionLabel={(option) => `${option.label} (${option.code})`}
+                    getOptionValue={(option) => option.code}
+                    filterOption={filterLanguageOption}
+                    isClearable
+                  />
+                </div>
+                <div className="mb-4 flex-1">
+                  {fileTranslationResult ? (
+                    <p>Your file is ready for download.</p>
                   ) : (
-                    <p>
-                      {fileTranslationType === 'videoToDoc'
-                        ? 'Drag and drop a .mp4 file here, or click to select one'
-                        : 'Drag and drop a .pdf file here, or click to select one'}
-                    </p>
+                    <p>No file available.</p>
                   )}
                 </div>
+                <button
+                  onClick={handleFileDownload}
+                  disabled={!fileTranslationResult}
+                  className="w-full py-3 bg-gradient-to-r from-purple-700 to-pink-500 text-white font-semibold rounded cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {fileTranslationType === 'pdfToPdf' ? 'Download PDF' : 'Download DOCX'}
+                </button>
               </div>
-
-              <button
-                onClick={handleFileTranslate}
-                disabled={isFileLoading}
-                className="w-full py-3 bg-[#003459] text-white font-semibold rounded cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isFileLoading ? 'Translating...' : 'Translate File'}
-              </button>
-            </div>
-
-            {/* Right Column: "To:" language and download section */}
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
-              <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">
-                Download
-              </h2>
-
-              <div className="mb-4">
-                <label className="block mb-2 font-semibold text-[#003459]">
-                  To:
-                </label>
-                <Select
-                  instanceId="file-target-language-select"
-                  options={languageOptions}
-                  value={fileTargetLang}
-                  onChange={(option: SingleValue<LanguageOption>) =>
-                    setFileTargetLang(option)
-                  }
-                  placeholder="Output language"
-                  getOptionLabel={(option) =>
-                    `${option.label} (${option.code})`
-                  }
-                  getOptionValue={(option) => option.code}
-                  filterOption={filterLanguageOption}
-                  isClearable
-                />
-              </div>
-
-              <div className="mb-4 flex-1">
-                {fileTranslationResult ? (
-                  <p>Your file is ready for download.</p>
-                ) : (
-                  <p>No file available.</p>
-                )}
-              </div>
-
-              <button
-                onClick={handleFileDownload}
-                disabled={!fileTranslationResult}
-                className="w-full py-3 bg-gradient-to-r from-purple-700 to-pink-500 text-white font-semibold rounded cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {fileTranslationType === 'pdfToPdf'
-                  ? 'Download PDF'
-                  : 'Download DOCX'}
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
