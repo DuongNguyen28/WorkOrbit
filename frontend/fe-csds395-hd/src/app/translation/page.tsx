@@ -110,61 +110,55 @@ const TranslatePage: NextPage = () => {
 
   const handleFileTranslate = async () => {
     if (!fileToTranslate || !fileSourceLang || !fileTargetLang) {
-      alert('Please select a file and both languages before translating.')
-      return
+      alert('Please select a file and both languages before translating.');
+      return;
     }
-    setIsFileLoading(true)
-    setFileTranslationResult('')
+    setIsFileLoading(true);
+    setFileTranslationResult('');
     try {
-      const formData = new FormData()
-      formData.append('file', fileToTranslate)
-      formData.append('src_language', fileSourceLang.code)
-      formData.append('dest_language', fileTargetLang.code)
-      let dest_file = ''
-      if (fileTranslationType === 'pdfToDocx') dest_file = 'docx'
-      else if (fileTranslationType === 'pdfToPdf') dest_file = 'pdf'
-      else if (fileTranslationType === 'videoToDoc') dest_file = 'docx'
-      formData.append('dest_file', dest_file)
-      const response = await fetch('http://localhost:8000/translate/document', {
+      const formData = new FormData();
+      formData.append('file', fileToTranslate);
+      formData.append('src_language', fileSourceLang.code);
+      formData.append('dest_language', fileTargetLang.code);
+  
+      let endpoint = '';
+      if (fileTranslationType === 'videoToDoc') {
+        endpoint = 'http://localhost:8000/translate/video';
+      } else {
+        endpoint = 'http://localhost:8000/translate/document';
+        let dest_file = '';
+        if (fileTranslationType === 'pdfToDocx') dest_file = 'docx';
+        else if (fileTranslationType === 'pdfToPdf') dest_file = 'pdf';
+        formData.append('dest_file', dest_file);
+      }
+  
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
-      })
+      });
+  
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error('File translation error:', errorData)
-        alert('File translation failed: ' + (errorData.message || 'Unknown error'))
-        return
+        const errorData = await response.json();
+        console.error('File translation error:', errorData);
+        alert('File translation failed: ' + (errorData.message || 'Unknown error'));
+        return;
       }
-      const contentType = response.headers.get('Content-Type')
+  
+      const contentType = response.headers.get('Content-Type');
       const expectedContentType = fileTranslationType === 'pdfToPdf'
         ? 'application/pdf'
-        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      if (!contentType || !contentType.includes(expectedContentType)) {
-        const text = await response.text()
-        console.error('Unexpected Content-Type:', contentType, 'Response:', text)
-        alert('Error: ' + text)
-        return
-      }
-      const arrayBuffer = await response.arrayBuffer()
-      if (fileTranslationType === 'pdfToPdf') {
-        const uint8Array = new Uint8Array(arrayBuffer.slice(0, 5))
-        const header = String.fromCharCode(...uint8Array)
-        if (header !== '%PDF-') {
-          console.error('Not a valid PDF, header:', header)
-          alert('Error: Received file is not a valid PDF')
-          return
-        }
-      }
-      const fileBlob = new Blob([arrayBuffer], { type: expectedContentType })
-      const fileURL = window.URL.createObjectURL(fileBlob)
-      setFileTranslationResult(fileURL)
+        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+      let fileBlob = await response.blob();
+      const fileURL = window.URL.createObjectURL(fileBlob);
+      setFileTranslationResult(fileURL);
     } catch (error) {
-      console.error('File translation error:', error)
-      alert('There was a problem with file translation.')
+      console.error('File translation error:', error);
+      alert('There was a problem with file translation.');
     } finally {
-      setIsFileLoading(false)
+      setIsFileLoading(false);
     }
-  }
+  };
 
   const handleFileDownload = () => {
     if (!fileTranslationResult) {
