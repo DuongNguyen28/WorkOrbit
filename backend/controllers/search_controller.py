@@ -40,7 +40,7 @@ def upload(file: UploadFile = File(...)):
 
 
 @search_router.post("/")
-def handle_search(query: str):
+def handle_search(query: str, file_type: str=None):
     filters, parsed_query = extract_filters(query)
     print(parsed_query)
     from_ = 0 # for pagination
@@ -57,6 +57,25 @@ def handle_search(query: str):
         }
     else:
         search_query = {"must": {"match_all": {}}}
+
+    if file_type:
+        file_type_filter = {"term": {"file_type": file_type.lower()}}
+        # If your extract_filters function already returned filters that use a "filter" key,
+        # merge the file_type filter with the existing ones.
+        if "filter" in filters:
+            if isinstance(filters["filter"], list):
+                filters["filter"].append(file_type_filter)
+            else:
+                filters["filter"] = [filters["filter"], file_type_filter]
+        else:
+            filters["filter"] = [file_type_filter]
+
+    query_body = {"bool": {}}
+    if "must" in search_query:
+        query_body["bool"]["must"] = search_query["must"]
+    if "filter" in filters:
+        query_body["bool"]["filter"] = filters["filter"]
+
     results = es.search(
         query={"bool": {**search_query, **filters}},
         # knn={
@@ -140,5 +159,13 @@ def extract_filters(query):
             }
         )
         query = re.sub(filter_regex, "", query).strip()
-
+    filter_regex = r"file:([^\s]+)\s*"
+    m = re.search(filter_regex, query)
+    if m:
+        filters.append(
+            {
+                "term": {"file_type": m.group(1).lower()}
+            }
+        )
+        query = re.sub(filter_regex, "", query).strip()
     return {"filter": filters}, query
