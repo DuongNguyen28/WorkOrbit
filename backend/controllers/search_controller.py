@@ -10,11 +10,9 @@ search_router = APIRouter(
 )
 es = ElasticSearchService()
 
-@search_router.post("/testidx")
 def setup_test_idx():
     es.reindex()
 
-@search_router.post("/getdoc")
 def get_my_id():
     es.retrieve_document("my_id")
 
@@ -123,7 +121,6 @@ def handle_search(query: str, file_type: str=None):
     }
 
 
-@search_router.get("/documents/{doc_id}")
 async def retrieve_document(doc_id: str):
     document = es.retrieve_document(doc_id)
     return document
