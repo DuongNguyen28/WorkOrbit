@@ -120,6 +120,20 @@ def handle_search(query: str, file_type: str=None):
         # "aggs": aggs,
     }
 
+# Get all documents
+@search_router.get("/")
+def get_all_documents():
+    pass
+
+# Get number of files
+@search_router.get("/summary")
+def get_files_summary():
+    return {
+        "pdf": 0,
+        "docx": 0,
+        "xlsx": 0,
+        "image": 0
+    }
 
 async def retrieve_document(doc_id: str):
     document = es.retrieve_document(doc_id)
