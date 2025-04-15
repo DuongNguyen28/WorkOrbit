@@ -7,10 +7,10 @@ import AuthPanel from '@components/header/Auth/AuthPanel';
 export default function Home() {
   const [mode, setMode] = useState<'signup' | 'login'>('login');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log(`Submitting ${mode} form`);
-  };
+  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   console.log(`Submitting ${mode} form`);
+  // };
 
   const handleSwitchMode = () => {
     setMode(mode === 'signup' ? 'login' : 'signup');
@@ -37,7 +37,7 @@ export default function Home() {
       <div className="w-1/2 flex justify-center items-center">
         <AuthPanel
           mode={mode}
-          onSubmit={handleSubmit}
+          // onSubmit={handleSubmit}
           onSwitchMode={handleSwitchMode}
           className="h-1/2 flex flex-col justify-center items-center"
         />
