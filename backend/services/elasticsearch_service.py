@@ -67,7 +67,6 @@ class ElasticSearchService:
         else:
             file_path = filename
 
-
         with open(file_path, "rb") as pdf_file:
             enc_file = base64.b64encode(pdf_file.read()).decode("utf-8")
 
@@ -86,18 +85,13 @@ class ElasticSearchService:
 
         resp1 = self.es.index(
             index="idx",
-            # id="my_id",
             pipeline="attachment",
             document={"data": enc_file,
                       "file_type": file_type},
         )
+        print(resp1)
 
         return url
-        # resp2 = self.es.get(
-        #     index="idx",
-        #     # id="my_id",
-        # )
-        # print(resp2)
     
     def upload_file(self, file_path, file_type):
         gcs_path = f"{file_type}/{os.path.basename(file_path)}"
