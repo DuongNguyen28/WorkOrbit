@@ -63,7 +63,6 @@ class ElasticSearchService:
         else:
             file_path = filename
 
-
         with open(file_path, "rb") as pdf_file:
             enc_file = base64.b64encode(pdf_file.read()).decode("utf-8")
 
