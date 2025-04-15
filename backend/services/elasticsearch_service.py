@@ -60,7 +60,18 @@ class ElasticSearchService:
     def ingest_document(self, filename, file_type=None):
         if file_type is None:
             _, ext = os.path.splitext(filename)
-            file_type = ext.lstrip('.').lower() if ext else "uncategorized"
+            ext = ext.lstrip('.').lower()
+
+            if ext == "pdf":
+                file_type = "pdf"
+            elif ext == "docx":
+                file_type = "docx"
+            elif ext == "xlsx":
+                file_type = "xlsx"
+            elif ext in {"jpg", "jpeg", "png"}:
+                file_type = "image"
+            else:
+                file_type = "uncategorized"
 
         if filename[0] != "/":
             file_path = os.path.join(os.getcwd(), "backend/misc", filename)
