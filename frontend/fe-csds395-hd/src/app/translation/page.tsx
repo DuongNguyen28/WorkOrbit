@@ -207,13 +207,13 @@ const TranslatePage: NextPage = () => {
       <div className="w-full bg-white mt-4">
         <div className="flex gap-8">
           <div
-            className={`w-1/2 py-4 px-6 text-center font-semibold cursor-pointer transition-all duration-200 ${activeTab === 'text' ? 'bg-[#003459] text-white' : 'bg-white'}`}
+            className={`w-1/2 py-4 px-6 text-center font-semibold cursor-pointer transition-all duration-200 ${activeTab === 'text' ? 'bg-primary text-white' : 'bg-white'}`}
             onClick={() => setActiveTab('text')}
           >
             Text Translation
           </div>
           <div
-            className={`w-1/2 py-3 px-6 text-center font-semibold cursor-pointer transition-all duration-200 ${activeTab === 'file' ? 'bg-[#003459] text-white' : 'bg-white'}`}
+            className={`w-1/2 py-3 px-6 text-center font-semibold cursor-pointer transition-all duration-200 ${activeTab === 'file' ? 'bg-primary text-white' : 'bg-white'}`}
             onClick={() => setActiveTab('file')}
           >
             File Translation
@@ -226,11 +226,11 @@ const TranslatePage: NextPage = () => {
           <div className="w-full bg-white rounded-lg shadow p-8 h-full overflow-y-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
               <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full">
-                <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">
+                <h2 className="text-center text-lg font-semibold text-primary mb-4">
                   Text translation
                 </h2>
                 <div className="mb-4">
-                  <label className="block mb-2 font-semibold text-[#003459]">From:</label>
+                  <label className="block mb-2 font-semibold text-primary">From:</label>
                   <Select
                     instanceId="source-language-select"
                     options={languageOptions}
@@ -244,7 +244,7 @@ const TranslatePage: NextPage = () => {
                   />
                 </div>
                 <div className="mb-4 flex-1">
-                  <label className="block mb-2 font-semibold text-[#003459]">Type text here</label>
+                  <label className="block mb-2 font-semibold text-primary">Type text here</label>
                   <textarea
                     className="w-full p-3 border border-gray-300 rounded resize-vertical min-h-[300px]"
                     value={originalText}
@@ -254,17 +254,17 @@ const TranslatePage: NextPage = () => {
                 <button
                   onClick={handleTranslate}
                   disabled={isLoading}
-                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded-2xl cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-primary text-white font-semibold rounded-2xl cursor-pointer transition-all duration-200 hover:bg-primary disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Translating...' : 'Translate'}
                 </button>
               </div>
               <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
-                <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">
+                <h2 className="text-center text-lg font-semibold text-primary mb-4">
                   Translation result
                 </h2>
                 <div className="mb-4">
-                  <label className="block mb-2 font-semibold text-[#003459]">To:</label>
+                  <label className="block mb-2 font-semibold text-primary">To:</label>
                   <Select
                     instanceId="target-language-select"
                     options={languageOptions}
@@ -278,7 +278,7 @@ const TranslatePage: NextPage = () => {
                   />
                 </div>
                 <div className="mb-4 flex-1">
-                  <label className="block mb-2 font-semibold text-[#003459]">Result</label>
+                  <label className="block mb-2 font-semibold text-primary">Result</label>
                   <textarea
                     className="w-full p-3 border border-gray-300 rounded resize-vertical min-h-[300px]"
                     value={translatedText}
@@ -288,7 +288,7 @@ const TranslatePage: NextPage = () => {
                 <button
                   onClick={handleDownload}
                   disabled={!translatedText}
-                  className="w-full py-3 bg-[#00A7E1] text-white font-semibold rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-secondary text-white font-semibold rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   Download
                 </button>
@@ -301,19 +301,19 @@ const TranslatePage: NextPage = () => {
           <div className="w-full bg-white rounded-lg shadow p-8 h-full overflow-y-auto">
             <div className="flex justify-center mb-4 gap-4">
               <div
-                className={`py-3 px-6 border border-[#003459] rounded font-semibold cursor-pointer ${fileTranslationType === 'videoToDoc' ? 'bg-[#003459] text-white' : 'bg-white'}`}
+                className={`py-3 px-6 border border-primary rounded font-semibold cursor-pointer ${fileTranslationType === 'videoToDoc' ? 'bg-primary text-white' : 'bg-white'}`}
                 onClick={() => setFileTranslationType('videoToDoc')}
               >
                 Video to docx
               </div>
               <div
-                className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${fileTranslationType === 'pdfToDocx' ? 'bg-[#003459] text-white' : 'bg-white'}`}
+                className={`py-3 px-6 border border-primary rounded font-semibold text-center cursor-pointer transition-all ${fileTranslationType === 'pdfToDocx' ? 'bg-primary text-white' : 'bg-white'}`}
                 onClick={() => setFileTranslationType('pdfToDocx')}
               >
                 PDF to docx
               </div>
               <div
-                className={`py-3 px-6 border border-[#003459] rounded font-semibold text-center cursor-pointer transition-all ${fileTranslationType === 'pdfToPdf' ? 'bg-[#003459] text-white' : 'bg-white'}`}
+                className={`py-3 px-6 border border-primary rounded font-semibold text-center cursor-pointer transition-all ${fileTranslationType === 'pdfToPdf' ? 'bg-primary text-white' : 'bg-white'}`}
                 onClick={() => setFileTranslationType('pdfToPdf')}
               >
                 PDF to PDF
@@ -323,7 +323,7 @@ const TranslatePage: NextPage = () => {
               <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
                 <h2 className="text-center text-lg font-semibold mb-4">File translation</h2>
                 <div className="mb-4">
-                  <label className="block mb-2 font-semibold text-[#003459]">From:</label>
+                  <label className="block mb-2 font-semibold text-primary">From:</label>
                   <Select
                     instanceId="file-source-language-select"
                     options={languageOptions}
@@ -337,7 +337,7 @@ const TranslatePage: NextPage = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block mb-2 font-semibold text-[#003459]">
+                  <label className="block mb-2 font-semibold text-primary">
                     {fileTranslationType === 'videoToDoc' ? 'Choose .mp4 file' : 'Choose .pdf file'}
                   </label>
                   <div
@@ -372,15 +372,15 @@ const TranslatePage: NextPage = () => {
                 <button
                   onClick={handleFileTranslate}
                   disabled={isFileLoading}
-                  className="w-full py-3 bg-[#003459] text-white font-semibold rounded-2xl cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-primary text-white font-semibold rounded-2xl cursor-pointer transition-all duration-200 hover:bg-[#002d40] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isFileLoading ? 'Translating...' : 'Translate File'}
                 </button>
               </div>
               <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
-                <h2 className="text-center text-lg font-semibold text-[#003459] mb-4">Download</h2>
+                <h2 className="text-center text-lg font-semibold text-primary mb-4">Download</h2>
                 <div className="mb-4">
-                  <label className="block mb-2 font-semibold text-[#003459]">To:</label>
+                  <label className="block mb-2 font-semibold text-primary">To:</label>
                   <Select
                     instanceId="file-target-language-select"
                     options={languageOptions}
@@ -403,7 +403,7 @@ const TranslatePage: NextPage = () => {
                 <button
                   onClick={handleFileDownload}
                   disabled={!fileTranslationResult}
-                  className="w-full py-3 bg-[#00A7E1] text-white font-semibold rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-secondary text-white font-semibold rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {fileTranslationType === 'pdfToPdf' ? 'Download PDF' : 'Download DOCX'}
                 </button>

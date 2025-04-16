@@ -22,16 +22,16 @@ function AuthPanel({ mode, onSubmit, onSwitchMode, className }: AuthPanelProps) 
         <input
           type="text"
           placeholder="Username"
-          className="bg-white rounded-3xl p-2 mb-4 w-full text-black placeholder-gray-500 hover:bg-gray-100 focus:ring-2 focus:ring-[#003459] focus:outline-none transition-colors duration-200"
+          className="bg-white rounded-3xl p-2 mb-4 w-full text-black placeholder-gray-500 hover:bg-gray-100 focus:ring-2 focus:ring-primary focus:outline-none transition-colors duration-200"
         />
         <input
           type="password"
           placeholder="Password"
-          className="bg-white rounded-3xl p-2 mb-4 w-full text-black placeholder-gray-500 hover:bg-gray-100 focus:ring-2 focus:ring-[#003459] focus:outline-none transition-colors duration-200"
+          className="bg-white rounded-3xl p-2 mb-4 w-full text-black placeholder-gray-500 hover:bg-gray-100 focus:ring-2 focus:ring-primary focus:outline-none transition-colors duration-200"
         />
         <button
           type="submit"
-          className="bg-[#003459] text-white font-bold py-2 px-4 rounded-3xl w-full shadow-md hover:bg-[#002a45] transition-colors duration-200"
+          className="bg-primary text-white font-bold py-2 px-4 rounded-3xl w-full shadow-md hover:bg-[#002a45] transition-colors duration-200"
         >
           {buttonText}
         </button>
@@ -39,7 +39,7 @@ function AuthPanel({ mode, onSubmit, onSwitchMode, className }: AuthPanelProps) 
       <p className="text-white text-sm mt-4 text-center">
         {linkText}{' '}
         <span
-          className="text-[#003459] underline cursor-pointer hover:text-[#001a2e] transition-colors duration-200 font-bold"
+          className="text-primary underline cursor-pointer hover:text-[#001a2e] transition-colors duration-200 font-bold"
           onClick={onSwitchMode}
         >
           {linkAction}

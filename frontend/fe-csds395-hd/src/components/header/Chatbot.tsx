@@ -61,7 +61,7 @@ const Chatbot = () => {
         onClick={toggleChat}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-4 right-4 bg-[#003459] text-white p-3 rounded-full shadow-lg z-50 focus:outline-none hover:bg-[#0041a8] transition-colors"
+        className="fixed bottom-4 right-4 bg-primary text-white p-3 rounded-full shadow-lg z-50 focus:outline-none hover:bg-[#0041a8] transition-colors"
       >
         <span role="img" aria-label="chat">✉</span>
       </motion.button>
