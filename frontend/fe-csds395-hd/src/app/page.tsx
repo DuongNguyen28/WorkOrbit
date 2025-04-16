@@ -56,7 +56,7 @@ const Page: NextPage = () => {
         }
 
         .links a {
-          background-color: #007EA7; /* Slightly darker teal-blue */
+          background-color: #007EA7;
           color: #ffffff;
           padding: 0.75rem 1.25rem;
           border-radius: 4px;
@@ -65,7 +65,7 @@ const Page: NextPage = () => {
         }
 
         .links a:hover {
-          background-color: #00A7E1; /* Bright energetic blue on hover */
+          background-color: #00A7E1;
           transform: scale(1.05);
         }
 
