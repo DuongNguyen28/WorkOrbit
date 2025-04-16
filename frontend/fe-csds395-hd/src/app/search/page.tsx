@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PlusIcon, XMarkIcon, ArrowUpTrayIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import SearchBar from '../../components/SearchBar';
 import Categories from '../../components/Categories';
@@ -36,7 +36,24 @@ const SearchPage: NextPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [categoryCounts, setCategoryCounts] = useState({ pdf: 0, docx: 0, xlsx: 0, image: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchCategoryCounts = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/search/summary');
+        if (!response.ok) {
+          throw new Error('Failed to fetch category counts');
+        }
+        const data = await response.json();
+        setCategoryCounts(data);
+      } catch (error) {
+        console.error('Error fetching category counts:', error);
+      }
+    };
+    fetchCategoryCounts();
+  }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
@@ -83,7 +100,6 @@ const SearchPage: NextPage = () => {
         throw new Error('Upload failed');
       }
       console.log('Upload successful');
-      // After successful upload, show the success modal and clear selected file.
       setShowSuccessModal(true);
       setIsModalOpen(false);
       setSelectedFile(null);
@@ -95,7 +111,6 @@ const SearchPage: NextPage = () => {
     }
   };
 
-  // Refactored Success Modal component: the button now triggers opening the upload modal.
   const SuccessModal = ({ onNext }: { onNext: () => void }) => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -127,14 +142,12 @@ const SearchPage: NextPage = () => {
   return (
     <div className="bg-white min-h-screen">
       <Header />
-
-      {/* Main Content */}
       <main className="p-4">
         <h1 className="text-3xl font-bold text-gray-800 mt-8">Document Search</h1>
         <div className="w-full">
           <SearchBar value={query} onChange={handleSearch} />
         </div>
-        <Categories />
+        <Categories counts={categoryCounts} />
         <div className="flex justify-between items-center mt-8 mb-4">
           <h2 className="text-2xl font-bold text-gray-800">Search Results:</h2>
           <a href="#" className="text-blue-500">View All</a>
@@ -145,8 +158,6 @@ const SearchPage: NextPage = () => {
           ))}
         </div>
       </main>
-
-      {/* Footer Button */}
       <div className="fixed bottom-4 left-4">
         <button
           className="bg-[#1E3A8A] text-white rounded-full p-3 shadow-lg"
@@ -156,8 +167,6 @@ const SearchPage: NextPage = () => {
           <PlusIcon className="h-6 w-6" />
         </button>
       </div>
-
-      {/* Upload Modal */}
       {isModalOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -174,9 +183,7 @@ const SearchPage: NextPage = () => {
             >
               <XMarkIcon className="h-4 w-4" />
             </button>
-
             <div className="text-xl font-bold text-black mb-2">Upload</div>
-
             <div className="flex flex-col items-center w-full h-full">
               <div className="flex-grow flex items-center justify-center w-full">
                 <div className="w-full h-64">
@@ -225,7 +232,6 @@ const SearchPage: NextPage = () => {
                 )}
               </button>
             </div>
-
             <input
               type="file"
               ref={fileInputRef}
@@ -245,7 +251,6 @@ const SearchPage: NextPage = () => {
           </div>
         </div>
       )}
-
       {showSuccessModal && (
         <SuccessModal
           onNext={() => {
