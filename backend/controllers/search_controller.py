@@ -126,6 +126,7 @@ def get_all_documents():
     pass
 
 # Get number of files
+# image will contains .jpg, .jpeg, .png
 @search_router.get("/summary")
 def get_files_summary():
     return {

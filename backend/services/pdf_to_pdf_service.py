@@ -21,10 +21,14 @@ class PdfToPdfTranslationService:
                 return {"error": warnings}
 
             es = ElasticSearchService()
-            es.ingest_document(input_path, "pdf")
-            es.ingest_document(output_path, "translated_pdf")
-            
-            return {"message": "Translation successful", "file_link": output_path}
+            input_url = es.ingest_document(input_path, "pdf")
+            output_url = es.ingest_document(output_path, "translated_pdf")
+
+            return {
+                "local_path": output_path,
+                "orig_url":   input_url,
+                "trans_url":  output_url
+            }
         else:
             raise ValueError("Unsupported file format.")
 

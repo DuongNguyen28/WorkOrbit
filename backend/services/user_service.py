@@ -35,3 +35,9 @@ def authenticate_user(db: Session, username: str, password: str):
 
 def create_access_token(data: dict):
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+
+def get_user_by_username(db: Session, username: str) -> User | None:
+    return db.query(User).filter(User.username == username).first()
+
+def get_user_by_email(db: Session, email: str) -> User | None:
+    return db.query(User).filter(User.email == email).first()

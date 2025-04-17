@@ -14,7 +14,7 @@ dnspython
 elasticsearch
 email_validator
 exceptiongroup
-elasticsearch
+elasticsearch==8.17.1
 fastapi
 fastapi-cli
 filelock
