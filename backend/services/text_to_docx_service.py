@@ -12,8 +12,8 @@ class TextToDocService:
         doc = Document()
         doc.add_paragraph(text)
         doc.save(file_path)
-
+    
         es = ElasticSearchService()
-        es.ingest_document(file_path, "docx")
+        gcs_url = es.ingest_document(file_path, "docx")
         
-        return file_path
+        return file_path, gcs_url

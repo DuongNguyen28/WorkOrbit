@@ -2,6 +2,8 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from ..services.elasticsearch_service import ElasticSearchService
 import re
 import os
+from fastapi.responses import JSONResponse
+from datetime import datetime, timezone
 
 search_router = APIRouter(
     prefix="/search",
@@ -37,7 +39,7 @@ def upload(file: UploadFile = File(...)):
     }
 
 
-@search_router.post("/")
+# @search_router.post("/")
 def handle_search(query: str, file_type: str=None):
     filters, parsed_query = extract_filters(query)
     print(parsed_query)
@@ -120,12 +122,47 @@ def handle_search(query: str, file_type: str=None):
         # "aggs": aggs,
     }
 
+@search_router.post("/")
+def get_dummy_files(query: str, file_type: str=None):
+    print(f"Query: {query}, File Type: {file_type}")
+    dummy_data = [
+        {
+            "id": 1,
+            "user_id": 101,
+            "filename": "sample1.pdf",
+            "file_type": "pdf",
+            "file_path": "/files/sample1.pdf",
+            "source": "upload",
+            "uploaded_at": datetime.now(timezone.utc).isoformat()
+        },
+        {
+            "id": 2,
+            "user_id": 102,
+            "filename": "translated_doc.docx",
+            "file_type": "docx",
+            "file_path": "/files/translated_doc.docx",
+            "source": "translated",
+            "uploaded_at": datetime.now(timezone.utc).isoformat()
+        },
+        {
+            "id": 3,
+            "user_id": 103,
+            "filename": "summary.txt",
+            "file_type": "txt",
+            "file_path": "/files/summary.txt",
+            "source": "generated",
+            "uploaded_at": datetime.now(timezone.utc).isoformat()
+        }
+    ]
+    return JSONResponse(content=dummy_data)
+
 # Get all documents
 @search_router.get("/")
 def get_all_documents():
     pass
 
 # Get number of files
+# image will contains .jpg, .jpeg, .png
 @search_router.get("/summary")
 def get_files_summary():
     return {
