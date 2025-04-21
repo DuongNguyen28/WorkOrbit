@@ -13,3 +13,12 @@ def save_file_record(db: Session, file_data: FileCreate) -> File:
     db.commit()
     db.refresh(db_file)
     return db_file
+
+def get_summary(db: Session):
+    summary = {
+        "pdf": db.query(File).filter(File.file_type == "pdf").count(),
+        "docx": db.query(File).filter(File.file_type == "docx").count(),
+        "xlsx": db.query(File).filter(File.file_type == "xlsx").count(),
+        "image": db.query(File).filter(File.file_type.in_(["jpg", "jpeg", "png"])).count()
+    }
+    return summary

@@ -9,11 +9,21 @@ class FileBase(BaseModel):
 
 class FileCreate(FileBase):
     user_id: int
+    filename: str
+    file_type: str
+    source: str
+    uploaded_at: datetime
+    file_path: str
 
 class FileOut(FileBase):
     id: int
-    user_id: int
+    file_type: str
+    source: str
     uploaded_at: datetime
+    user_id: int
+    filename: str
+    file_path: str
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }

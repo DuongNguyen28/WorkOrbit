@@ -6,6 +6,7 @@ from typing import List, Optional
 from ..controllers.auth_controller import get_db
 from ..schemas.file import FileOut
 from ..models.file import File
+from ..services.file_service import get_summary
 
 router = APIRouter()
 
@@ -25,3 +26,23 @@ def list_files(
         q = q.filter(File.file_type == file_type)
     q = q.order_by(desc(File.uploaded_at))
     return q.all()
+
+# Get number of files
+# image will contains .jpg, .jpeg, .png
+@router.get("/summary")
+def get_files_summary(db: Session = Depends(get_db)):
+    summary = get_summary(db)
+    if summary:
+        return summary
+    return {
+        "pdf": 0,
+        "docx": 0,
+        "xlsx": 0,
+        "image": 0
+    }
+
+# Get all documents
+@router.get("/")
+def get_all_documents(db: Session = Depends(get_db)):
+    documents = db.query(File).order_by(desc(File.uploaded_at))
+    return documents.all()

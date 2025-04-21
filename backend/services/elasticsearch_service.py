@@ -41,7 +41,11 @@ class ElasticSearchService:
         for document in documents:
             operations.append({"index": {"_index": "idx"}})
             operations.append(
-                {**document, "embedding": self.get_embedding(document["content"])}
+                {
+                    **document, 
+                    "embedding": self.get_embedding(document["content"]),
+                    "sql_id": document["id"]
+                }
             )
         return self.es.bulk(operations=operations)
 
@@ -57,7 +61,7 @@ class ElasticSearchService:
     def retrieve_document(self, id):
         return self.es.get(index="idx", id=id)
 
-    def ingest_document(self, filename, file_type=None):
+    def ingest_document(self, filename, file_type=None, sql_id=None):
         if file_type is None:
             _, ext = os.path.splitext(filename)
             ext = ext.lstrip('.').lower()
@@ -74,7 +78,7 @@ class ElasticSearchService:
                 file_type = "uncategorized"
 
         if filename[0] != "/":
-            file_path = os.path.join(os.getcwd(), "backend/misc", filename)
+            file_path = os.path.join(os.getenv("STORAGE_PATH", "/var/tmp/workorbit"), filename)
         else:
             file_path = filename
 
@@ -94,11 +98,18 @@ class ElasticSearchService:
         )
         print(resp)
 
+        document = {
+            "data": enc_file,
+            "file_type": file_type,
+            "file_name": os.path.basename(file_path),
+            "file_path": url,
+            "sql_id": sql_id,
+        }
+
         resp1 = self.es.index(
             index="idx",
             pipeline="attachment",
-            document={"data": enc_file,
-                      "file_type": file_type},
+            document=document,
         )
         print(resp1)
 
