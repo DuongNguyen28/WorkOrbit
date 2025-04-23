@@ -10,14 +10,12 @@ app = FastAPI()
 router = APIRouter()
 language_service = LanguageDetectionService()
 
-@router.post("/detect-language/text")
 async def detect_language_text(text: str):
     if not text:
         raise HTTPException(status_code=400, detail="Text cannot be empty.")
     detected_language = await language_service.detect_language(text)
     return {"detected_language": detected_language}
 
-@router.post("/detect-language/file")
 async def detect_language_file(file: UploadFile = File(...)):
     content = await file.read()
     file_type = file.filename.split(".")[-1].lower()

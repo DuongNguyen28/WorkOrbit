@@ -1,7 +1,15 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, File as FastAPIFile, UploadFile, HTTPException, Depends
 from ..services.elasticsearch_service import ElasticSearchService
 import re
 import os
+from fastapi.responses import JSONResponse
+from datetime import datetime, timezone
+from dotenv import load_dotenv
+load_dotenv()
+from ..models.file import File
+from ..schemas.file import FileOut
+from ..controllers.auth_controller import get_db
+from sqlalchemy.orm import Session
 
 search_router = APIRouter(
     prefix="/search",
@@ -17,28 +25,48 @@ def get_my_id():
     es.retrieve_document("my_id")
 
 @search_router.post("/upload")
-def upload(file: UploadFile = File(...)):
-    url = ""
+def upload(file: UploadFile = FastAPIFile(...), db: Session = Depends(get_db)):
     try:
         contents = file.file.read()
         print(os.getcwd() + "/backend/misc/" + file.filename)
         with open(os.getcwd() + "/backend/misc/" + file.filename, "wb") as f:
             f.write(contents)
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Something went wrong")
-    finally:
-        file.file.close()
-        url = es.ingest_document(file.filename)
 
-    return {
-        "message": f"Successfully uploaded {file.filename}",
-        "gcs_url": url
-    }
+        file.file.close()
+
+        metadata = {
+            "user_id": 1,
+            "filename": file.filename,
+            "file_type": file.filename.split(".")[-1].lower(),
+            "source": "upload",
+            "uploaded_at": datetime.now(timezone.utc),
+            "file_path": "",
+        }
+
+        new_file = File(**metadata)
+        db.add(new_file)
+        db.commit()
+        db.refresh(new_file)
+
+        # Index and upload to GCS
+        gcs_url = es.ingest_document(
+            filename=file.filename,
+            file_type=new_file.file_type,
+            sql_id=new_file.id
+        )
+
+        # Update GCS URL in SQL
+        new_file.file_path = gcs_url
+        db.commit()
+
+        return FileOut.model_validate(new_file).model_dump()
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
 @search_router.post("/")
-def handle_search(query: str, file_type: str=None):
+def handle_search(query: str, file_type: str=None, db: Session = Depends(get_db)):
     filters, parsed_query = extract_filters(query)
     print(parsed_query)
     from_ = 0 # for pagination
@@ -112,14 +140,55 @@ def handle_search(query: str, file_type: str=None):
     #         if bucket["doc_count"] > 0
     #     },
     #}
-    return {
-        "results": results["hits"]["hits"],
-        "query": query,
-        "from_": from_,
-        "total": results["hits"]["total"]["value"],
-        # "aggs": aggs,
-    }
 
+    sql_ids = [hit["_source"]["sql_id"] for hit in results["hits"]["hits"] if "_source" in hit and "sql_id" in hit["_source"]]
+
+    files = db.query(File).filter(File.id.in_(sql_ids)).all()
+
+    # return {
+    #     "results": results["hits"]["hits"],
+    #     "query": query,
+    #     "from_": from_,
+    #     "total": results["hits"]["total"]["value"],
+    #     # "aggs": aggs,
+    # }
+
+    return [FileOut.model_validate(file).model_dump() for file in files]
+
+
+# @search_router.post("/")
+def get_dummy_files(query: str, file_type: str=None):
+    print(f"Query: {query}, File Type: {file_type}")
+    dummy_data = [
+        {
+            "id": 1,
+            "user_id": 101,
+            "filename": "sample1.pdf",
+            "file_type": "pdf",
+            "file_path": "/files/sample1.pdf",
+            "source": "upload",
+            "uploaded_at": datetime.now(timezone.utc).isoformat()
+        },
+        {
+            "id": 2,
+            "user_id": 102,
+            "filename": "translated_doc.docx",
+            "file_type": "docx",
+            "file_path": "/files/translated_doc.docx",
+            "source": "translated",
+            "uploaded_at": datetime.now(timezone.utc).isoformat()
+        },
+        {
+            "id": 3,
+            "user_id": 103,
+            "filename": "summary.txt",
+            "file_type": "txt",
+            "file_path": "/files/summary.txt",
+            "source": "generated",
+            "uploaded_at": datetime.now(timezone.utc).isoformat()
+        }
+    ]
+    return JSONResponse(content=dummy_data)
 
 async def retrieve_document(doc_id: str):
     document = es.retrieve_document(doc_id)

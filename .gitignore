@@ -7,6 +7,7 @@ __pycache__/
 
 # Virtual environment
 venv/
+venv_workorbit/
 env/
 .venv/
 
@@ -77,3 +78,5 @@ docs/
 .DS_Store
 
 serviceAccountKey.json
+
+misc/

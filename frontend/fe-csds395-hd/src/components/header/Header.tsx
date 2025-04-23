@@ -1,12 +1,30 @@
 import React from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation';
 
-const Header: React.FC = () => {
+
+export default function Header(){
+  const router = useRouter();
+  
+  const handleHeaderClick = (action: string) => {
+    switch (action) {
+      case 'signout':
+        router.push('/home');
+        // Add signout logic here if needed
+        break;
+      case 'user':
+        router.push('/user');
+        break;
+      default:
+        router.push('/landing');
+    }
+  };
+
   return (
     <header className="header">
-      <div className="header__left">
+      <div className="header__left" onClick={() => handleHeaderClick('landing')}>
         <Image src="/images/WorkOrbitLogo.png" alt="alt" width={98} height={100} /> 
-        <span className="header__title font-bold text-5xl">Work Orbit</span>
+        <h1 className="header__title">WorkOrbit</h1>
       </div>
 
       <div className="header__right">
@@ -15,9 +33,6 @@ const Header: React.FC = () => {
         </button>
         <button className="header__icon-button">
           <Image src="/images/Vector.png" alt="alt" width={41} height={50} />
-        </button>
-        <button className="header__icon-button">
-          <Image src="/images/More.png" alt="alt" width={41} height={50} />
         </button>
       </div>
 
@@ -48,7 +63,7 @@ const Header: React.FC = () => {
           font-size: 1.5rem;
           font-weight: 700;
           color: #FFFFFF;
-          font-family: 'Montserrat';
+          font-family: 'Montserrat', sans-serif;
         }
 
         .header__right {
@@ -66,7 +81,6 @@ const Header: React.FC = () => {
         }
       `}</style>
     </header>
-    )
+  )
 }
 
-export default Header

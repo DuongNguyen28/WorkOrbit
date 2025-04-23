@@ -149,6 +149,7 @@ function AuthPanel({ mode, onSwitchMode, className /*, onSuccess, onError */ }: 
         {linkText}{' '}
         <button // Changed span to button for better accessibility/semantics
           type="button"
+
           onClick={onSwitchMode}
           disabled={isLoading} // Optionally disable while loading
           className="text-[#003459] underline cursor-pointer hover:text-[#001a2e] transition-colors duration-200 font-bold bg-transparent border-none p-0 disabled:opacity-50 disabled:cursor-not-allowed"
