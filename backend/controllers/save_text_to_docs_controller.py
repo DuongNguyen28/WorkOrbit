@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 import os
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,6 +13,7 @@ from ..services.file_service import save_file_record
 
 router = APIRouter()
 text_to_doc_service = TextToDocService()
+EST = timezone(timedelta(hours=-5), name="EST")
 
 class TextRequest(BaseModel):
     text: str
@@ -31,6 +33,7 @@ async def save_text_to_doc(
         filename  = os.path.basename(local_path),
         file_type = "docx",
         file_path = gcs_url,
+        uploaded_at=datetime.now(EST),
         source    = "generated",
     ))
 

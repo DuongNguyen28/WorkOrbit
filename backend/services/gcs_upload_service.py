@@ -2,6 +2,7 @@ from google.cloud import storage
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
+from urllib.parse import urlparse, unquote
 
 class GCSFileUploadService:
     def __init__(self):
@@ -18,7 +19,7 @@ class GCSFileUploadService:
 
         blob.upload_from_filename(local_file_path)
 
-        url = blob.generate_signed_url(expiration=timedelta(hours=1))
+        url = blob.generate_signed_url(expiration=timedelta(hours=720))
 
         return url
     
@@ -26,6 +27,28 @@ class GCSFileUploadService:
         bucket = self.storage_client.bucket(self.bucket_name)
         blob = bucket.blob(destination_blob_name)
         blob.upload_from_file(file_bytes, rewind=True)
-        url = blob.generate_signed_url(expiration=timedelta(hours=1))
+        url = blob.generate_signed_url(expiration=timedelta(hours=720))
         return url
+    
+    def delete_gcs_file(self, file_url: str):
+        parsed = urlparse(file_url)
+
+        parts = parsed.path.lstrip('/').split('/', 1)
+        if len(parts) != 2:
+            print(f"Invalid GCS URL format: {file_url}")
+            return False
+
+        bucket_name = parts[0]
+        blob_name = unquote(parts[1])
+
+        bucket = self.storage_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+
+        if not blob.exists():
+            print(f"File not found: {blob_name}")
+            return False
+
+        blob.delete()
+        print(f"Deleted file: {blob_name}")
+        return True
 

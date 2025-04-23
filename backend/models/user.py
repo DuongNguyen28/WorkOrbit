@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from ..controllers.database import Base
 from sqlalchemy.orm import relationship
+
+EST = timezone(timedelta(hours=-5), name="EST")  # Assuming EST is UTC-5, adjust as needed
 
 class User(Base):
     __tablename__ = "users"
@@ -11,5 +13,5 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
     role = Column(String, default="user")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(EST))
     files = relationship("File", back_populates="user")

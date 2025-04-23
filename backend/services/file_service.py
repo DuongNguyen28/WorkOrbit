@@ -19,6 +19,6 @@ def get_summary(db: Session):
         "pdf": db.query(File).filter(File.file_type == "pdf").count(),
         "docx": db.query(File).filter(File.file_type == "docx").count(),
         "xlsx": db.query(File).filter(File.file_type == "xlsx").count(),
-        "image": db.query(File).filter(File.file_type.in_(["jpg", "jpeg", "png"])).count()
+        "image": db.query(File).filter(File.file_type.in_(["jpg", "jpeg", "png", "image"])).count()
     }
     return summary
