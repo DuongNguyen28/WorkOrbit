@@ -21,8 +21,7 @@ interface SearchResult {
 const searchResults: SearchResult[] = [
   { id: 1, fileName: 'Q4 Financial Report.pdf', modified: '2 days ago', category: 'PDF Files' },
   { id: 2, fileName: 'Project Proposal.docx', modified: 'yesterday', category: 'Word Documents' },
-  { id: 3, fileName: 'Q4 Financial Report.pdf', modified: '2 days ago', category: 'PDF Files' },
-  { id: 4, fileName: 'Project Proposal.docx', modified: 'yesterday', category: 'Word Documents' },
+  { id: 4, fileName: 'Project Proposal.xlsx', modified: 'yesterday', category: 'Spreadsheets' },
 ];
 
 const SearchPage: NextPage = () => {

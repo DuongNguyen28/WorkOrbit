@@ -1,5 +1,5 @@
 import ActionButton from './ActionButton';
-import { CloudArrowUpIcon, MagnifyingGlassIcon, FolderIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
+import { CloudArrowUpIcon, MagnifyingGlassIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
 
 interface ActionButtonsProps {
   onClick: (action: string) => void;
@@ -21,13 +21,13 @@ export default function ActionButtons({ onClick }: ActionButtonsProps) {
       backgroundColor: "bg-purple-100",
       action: "search"
     },
-    {
-      icon: <FolderIcon className="h-8 w-8 text-yellow-500" />,
-      title: "Manage Files",
-      subtext: "Organize your documents",
-      backgroundColor: "bg-yellow-100",
-      action: "manage"
-    },
+    // {
+    //   icon: <FolderIcon className="h-8 w-8 text-yellow-500" />,
+    //   title: "Manage Files",
+    //   subtext: "Organize your documents",
+    //   backgroundColor: "bg-yellow-100",
+    //   action: "manage"
+    // },
     {
       icon: <GlobeAltIcon className="h-8 w-8 text-orange-500" />,
       title: "Translate",
@@ -38,7 +38,7 @@ export default function ActionButtons({ onClick }: ActionButtonsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
       {buttons.map((button, index) => (
         <ActionButton
           key={index}

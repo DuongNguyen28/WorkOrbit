@@ -70,7 +70,7 @@ function AuthPanel({ mode, onSwitchMode, className /*, onSuccess, onError */ }: 
       console.log('Authentication successful:', data);
 
       if (isLogin) {
-        router.push('/translation');
+        router.push('/landing');
       } else {
         alert('Sign up successful! Please log in.'); 
         onSwitchMode(); 
