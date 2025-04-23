@@ -76,6 +76,10 @@ class ElasticSearchService:
                 file_type = "image"
             else:
                 file_type = "uncategorized"
+        else:
+            file_type = file_type.lower()
+            if file_type in {"jpg", "jpeg", "png"}:
+                file_type = "image"
 
         if filename[0] != "/":
             file_path = os.path.join(os.getcwd(), "backend/misc", filename)

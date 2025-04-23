@@ -34,7 +34,7 @@ const SearchPage: NextPage = () => {
   useEffect(() => {
     const fetchCategoryCounts = async () => {
       try {
-        const response = await fetch('http://localhost:8000/search/summary');
+        const response = await fetch('http://localhost:8000/summary');
         if (!response.ok) {
           throw new Error('Failed to fetch category counts');
         }
