@@ -5,11 +5,15 @@ interface ActivityItemProps {
   icon: React.ReactNode;
   title: string;
   subtext: string;
+  onClick?: () => void;
 }
 
-export default function ActivityItem({ icon, title, subtext }: ActivityItemProps) {
+export default function ActivityItem({ icon, title, subtext, onClick }: ActivityItemProps) {
   return (
-    <div className="flex justify-between items-center p-4 bg-gray-100 rounded-lg">
+    <div 
+      className="flex justify-between items-center p-4 bg-gray-100 rounded-lg"
+      onClick={onClick}
+    >
       <div className="flex items-center">
         {icon}
         <div className="ml-4">

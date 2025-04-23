@@ -5,8 +5,6 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/navigation'
 
-import Link from 'next/link'
-
 const Page: NextPage = () => {
   const router = useRouter()
 
