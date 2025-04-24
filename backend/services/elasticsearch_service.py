@@ -90,6 +90,8 @@ class ElasticSearchService:
             enc_file = base64.b64encode(pdf_file.read()).decode("utf-8")
 
         url = self.upload_file(file_path, file_type)
+        
+        os.remove(file_path)
 
         resp = self.es.ingest.put_pipeline(
             id="attachment",
