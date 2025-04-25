@@ -13,7 +13,7 @@ export default function Header(){
         // Add signout logic here if needed
         break;
       case 'user':
-        router.push('/user');
+        router.push('/profile');
         break;
       default:
         router.push('/landing');
@@ -27,12 +27,29 @@ export default function Header(){
         <h1 className="header__title">WorkOrbit</h1>
       </div>
 
-      <div className="header__right">
+      {/* <div className="header__right">
         <button>
           <Image src="/images/User.png" alt="alt" width={41} height={50} />
         </button>
         <button className="header__icon-button">
           <Image src="/images/Vector.png" alt="alt" width={41} height={50} />
+        </button>
+      </div> */}
+
+      <div className="header__right">
+        <button 
+          onClick={() => handleHeaderClick('user')} 
+          className="header__icon-button"
+          aria-label="User Profile"
+        >
+          <Image src="/images/User.png" alt="User Profile" width={41} height={50} />
+        </button>
+        <button 
+          onClick={() => handleHeaderClick('signout')} 
+          className="header__icon-button"
+          aria-label="Sign Out"
+        >
+          <Image src="/images/Vector.png" alt="Sign Out" width={41} height={50} />
         </button>
       </div>
 
