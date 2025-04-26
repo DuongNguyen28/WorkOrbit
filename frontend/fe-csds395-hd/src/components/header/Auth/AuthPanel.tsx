@@ -57,12 +57,20 @@ function AuthPanel({ mode, onSwitchMode, className /*, onSuccess, onError */ }: 
       });
 
       if (!response.ok) {
-        let errorMessage = `Error: ${response.status} ${response.statusText}`;
+        let errorMessage : string; //= `Error: ${response.status} ${response.statusText}`;
+        if (isLogin && response.status == 404) {
+          errorMessage = 'Login failed';
+        }
+        else {
+          errorMessage = `Error: ${response.status} ${response.statusText}`;
         try {
           const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch (jsonError) {
-          console.error('Failed to parse error response:', jsonError);
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          // ignore JSON parse errors
+          }
         }
         throw new Error(errorMessage);
       }
@@ -73,7 +81,8 @@ function AuthPanel({ mode, onSwitchMode, className /*, onSuccess, onError */ }: 
       if (isLogin) {
         if (data.access_token) {
           localStorage.setItem('jwt', data.access_token);
-        } else {
+        } 
+        else {
           console.error('No access token found in response!');
         }
         router.push('/landing');
