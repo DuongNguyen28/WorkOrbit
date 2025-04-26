@@ -63,7 +63,7 @@ class PdfToDocxTranslatorService:
         # If no warnings, return an empty list (indicating no issues)
         return warnings
 
-    async def process_file(self, input_path: str, output_path: str, src_language: str, dest_language: str):
+    async def process_file(self, input_path: str, src_language: str, dest_language: str):
         """Determine file type, detect language, and process accordingly."""
         output_path = f"{src_language}-{dest_language}_{int(time.time())}.docx"
         output_path = os.path.join(os.getcwd(), "backend/misc", output_path)
@@ -77,10 +77,10 @@ class PdfToDocxTranslatorService:
             input_url = es.ingest_document(input_path, "pdf")
             output_url = es.ingest_document(output_path, "translated_docx")
             return {   
-            "local_path":  output_path,
-            "orig_url":    input_url,
-            "trans_url":   output_url
+                "local_path":  output_path,
+                "orig_url":    input_url,
+                "trans_url":   output_url
             }
-            # return {"message": "Translation successful", "file_link": output_path}
+
         else:
             raise ValueError("Unsupported file format.")

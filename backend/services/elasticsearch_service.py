@@ -88,7 +88,7 @@ class ElasticSearchService:
 
         with open(file_path, "rb") as pdf_file:
             enc_file = base64.b64encode(pdf_file.read()).decode("utf-8")
-
+        
         url = self.upload_file(file_path, file_type)
         
         os.remove(file_path)

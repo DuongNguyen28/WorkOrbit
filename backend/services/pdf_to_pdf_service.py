@@ -10,10 +10,10 @@ class PdfToPdfTranslationService:
         self.translate_client = TranslateClient()
         self.language_service = LanguageDetectionService()
     
-    async def process_file(self, input_path: str, output_path: str, src_language: str, dest_language: str):
+    async def process_file(self, input_path: str, src_language: str, dest_language: str):
         """Determine file type, detect language, and process accordingly."""
-        output_path = f"{src_language}-{dest_language}_{int(time.time())}.pdf"
-        output_path = os.path.join(os.getcwd(), "backend/misc", output_path)
+        output_filename = f"{src_language}-{dest_language}_{int(time.time())}.pdf"
+        output_path = os.path.join(os.getcwd(), "backend/misc", output_filename)
         if input_path.endswith('.pdf'):
             warnings = await self.translate_pdf(input_path, output_path, src_language, dest_language)
             

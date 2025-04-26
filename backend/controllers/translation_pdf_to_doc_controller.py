@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import tempfile
@@ -16,10 +16,10 @@ pdf_to_pdf_translator_service = PdfToPdfTranslationService()
 
 @router.post("/translate/document")
 async def translate_pdf(
-    file: UploadFile = File(...),
-    src_language: str = "en",
-    dest_language: str = "vi",
-    dest_file: str = "docx",
+    file: UploadFile,
+    src_language: str = Form(...),
+    dest_language: str = Form(...),
+    dest_file: str = Form(...),
     db: Session = Depends(get_db),
 ):
     # Create temporary file
@@ -28,25 +28,15 @@ async def translate_pdf(
         temp_file.write(await file.read())
     
     if dest_file == "docx":
-        output_filename = "translated_document.docx"
-        output_path = pdf_path.replace(".pdf", "_translated.docx")
-        result = await pdf_to_docx_translator_service.process_file(pdf_path, output_path, src_language, dest_language)
+        result = await pdf_to_docx_translator_service.process_file(pdf_path, src_language, dest_language)
         media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        out_type = "docx"
     else:
-        output_filename = "translated_document.pdf"
-        output_path = pdf_path.replace(".pdf", "_translated.pdf")
-        result = await pdf_to_pdf_translator_service.process_file(pdf_path, output_path, src_language, dest_language)
+        result = await pdf_to_pdf_translator_service.process_file(pdf_path, src_language, dest_language)
         media_type = "application/pdf"
-        out_type = "pdf"
-
-    # Cleanup temporary file
-    os.unlink(pdf_path)
 
     if "error" in result:
-        raise HTTPException(status_code=400, detail=result["error"])
+        return {"error": result["error"]}
 
-    # Persist the original PDF (source="upload")
     save_file_record(db, FileCreate(
         user_id   = 1,                           # replace with real user later
         filename  = os.path.basename(pdf_path),
@@ -55,17 +45,17 @@ async def translate_pdf(
         source    = "upload",
     ))
 
-    # Persist the translated file (source="translated")
     local_out = result["local_path"]
     save_file_record(db, FileCreate(
         user_id   = 1,
         filename  = os.path.basename(local_out),
-        file_type = out_type,
+        file_type = "pdf" if dest_file == "pdf" else "docx",
         file_path = result["trans_url"],
         source    = "translated",
     ))
 
-    # Stream the translated file back to the client
+    os.unlink(pdf_path)
+
     return FileResponse(
         path        = local_out,
         media_type  = media_type,
