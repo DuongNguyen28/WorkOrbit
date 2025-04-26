@@ -9,21 +9,18 @@ interface CategoriesProps {
     xlsx: number;
     image: number;
   };
+  onSelectCategory: (file_type: string) => void;
 }
 
-export default function Categories({ counts }: CategoriesProps) {
+export default function Categories({ counts, onSelectCategory }: CategoriesProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const categories = [
-    { icon: <DocumentTextIcon className="h-8 w-8 text-red-500" />, title: 'PDF Files', count: counts.pdf },
-    { icon: <DocumentIcon className="h-8 w-8 text-blue-500" />, title: 'Word Documents', count: counts.docx },
-    { icon: <TableCellsIcon className="h-8 w-8 text-green-500" />, title: 'Spreadsheets', count: counts.xlsx },
-    { icon: <PhotoIcon className="h-8 w-8 text-yellow-500" />, title: 'Images', count: counts.image },
+    { icon: <DocumentTextIcon className="h-8 w-8 text-red-500" />, title: 'PDF Files', count: counts.pdf, file_type: 'pdf' },
+    { icon: <DocumentIcon className="h-8 w-8 text-blue-500" />, title: 'Word Documents', count: counts.docx, file_type: 'docx' },
+    { icon: <TableCellsIcon className="h-8 w-8 text-green-500" />, title: 'Spreadsheets', count: counts.xlsx, file_type: 'xlsx' },
+    { icon: <PhotoIcon className="h-8 w-8 text-yellow-500" />, title: 'Images', count: counts.image, file_type: 'image' },
   ];
-
-  const handleCardClick = (index: number) => {
-    setSelectedIndex(index);
-  };
 
   return (
     <section className="mt-8">
@@ -34,7 +31,15 @@ export default function Categories({ counts }: CategoriesProps) {
             key={index}
             category={category}
             isSelected={selectedIndex === index}
-            onClick={() => handleCardClick(index)}
+            onClick={() => {
+              if (selectedIndex === index) {
+                setSelectedIndex(null);
+                onSelectCategory('');
+              } else {
+                setSelectedIndex(index);
+                onSelectCategory(category.file_type);
+              }
+            }}
           />
         ))}
       </div>
