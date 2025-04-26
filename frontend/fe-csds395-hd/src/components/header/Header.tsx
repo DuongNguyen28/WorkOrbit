@@ -9,8 +9,8 @@ export default function Header(){
   const handleHeaderClick = (action: string) => {
     switch (action) {
       case 'signout':
+        localStorage.removeItem('jwt');
         router.push('/home');
-        // Add signout logic here if needed
         break;
       case 'user':
         router.push('/profile');
@@ -31,7 +31,7 @@ export default function Header(){
         <button>
           <Image src="/images/User.png" alt="alt" width={41} height={50} />
         </button>
-        <button className="header__icon-button">
+        <button className="header__icon-button" onClick={() => handleHeaderClick('signout')}>
           <Image src="/images/Vector.png" alt="alt" width={41} height={50} />
         </button>
       </div> */}

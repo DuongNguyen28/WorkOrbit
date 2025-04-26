@@ -9,8 +9,11 @@ import RecentActivityComponent from '@/components/RecentActivities';
 import UploadModal from '@/components/Modals/Upload';
 import SuccessModal from '@/components/Modals/Success';
 import Chatbot from '@/components/header/Chatbot';
+import { useAuthGuard } from '@components/AuthGuard';
 
 export default function LandingPage() {
+  useAuthGuard();
+
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const router = useRouter();

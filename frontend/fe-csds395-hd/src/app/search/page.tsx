@@ -10,6 +10,7 @@ import Header from '@/components/header/Header';
 import UploadModal from '@/components/Modals/Upload';
 import SuccessModal from '@/components/Modals/Success';
 import Chatbot from '@/components/header/Chatbot';
+import { useAuthGuard } from '@components/AuthGuard';
 
 interface SearchResult {
   id: number;
@@ -29,6 +30,8 @@ const SearchPage: NextPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [categoryCounts, setCategoryCounts] = useState({ pdf: 0, docx: 0, xlsx: 0, image: 0 });
+
+  useAuthGuard();
 
   useEffect(() => {
     const fetchCategoryCounts = async () => {

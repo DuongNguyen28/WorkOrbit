@@ -7,6 +7,7 @@ import languages from '@/data/languages.json'
 
 import Header from '@components/header/Header'
 import Chatbot from '@components/header/Chatbot'
+import { useAuthGuard } from '@/components/AuthGuard'
 
 interface LanguageOption {
   code: string
@@ -16,6 +17,8 @@ interface LanguageOption {
 const languageOptions: LanguageOption[] = languages
 
 const TranslatePage: NextPage = () => {
+  useAuthGuard()
+
   const [activeTab, setActiveTab] = useState<'text' | 'file'>('text')
   const [sourceLang, setSourceLang] = useState<LanguageOption | null>(null)
   const [targetLang, setTargetLang] = useState<LanguageOption | null>(null)
@@ -150,6 +153,7 @@ const TranslatePage: NextPage = () => {
       }
 
       const fileBlob = await response.blob()
+      console.log(fileBlob)
       const fileURL = window.URL.createObjectURL(fileBlob)
       setFileTranslationResult(fileURL)
     } catch (error) {
@@ -223,9 +227,9 @@ const TranslatePage: NextPage = () => {
 
       <div className="flex-grow">
         {activeTab === 'text' && (
-          <div className="w-full bg-white rounded-lg shadow p-8 h-full overflow-y-auto">
+          <div className="w-full bg-white shadow p-8 h-full overflow-y-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-              <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full">
+              <div className="bg-gray-50 p-6 shadow-sm h-full">
                 <h2 className="text-center text-lg font-semibold text-primary mb-4">
                   Text translation
                 </h2>
@@ -259,7 +263,7 @@ const TranslatePage: NextPage = () => {
                   {isLoading ? 'Translating...' : 'Translate'}
                 </button>
               </div>
-              <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
+              <div className="bg-gray-50 p-6 shadow-sm h-full flex flex-col">
                 <h2 className="text-center text-lg font-semibold text-primary mb-4">
                   Translation result
                 </h2>
@@ -298,7 +302,7 @@ const TranslatePage: NextPage = () => {
         )}
 
         {activeTab === 'file' && (
-          <div className="w-full bg-white rounded-lg shadow p-8 h-full overflow-y-auto">
+          <div className="w-full bg-white shadow p-8 h-full overflow-y-auto">
             <div className="flex justify-center mb-4 gap-4">
               <div
                 className={`py-3 px-6 border border-primary rounded font-semibold cursor-pointer ${fileTranslationType === 'videoToDoc' ? 'bg-primary text-white' : 'bg-white'}`}
@@ -320,7 +324,7 @@ const TranslatePage: NextPage = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-              <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
+              <div className="bg-gray-50 p-6 shadow-sm h-full flex flex-col">
                 <h2 className="text-center text-lg font-semibold mb-4">File translation</h2>
                 <div className="mb-4">
                   <label className="block mb-2 font-semibold text-primary">From:</label>
@@ -377,7 +381,7 @@ const TranslatePage: NextPage = () => {
                   {isFileLoading ? 'Translating...' : 'Translate File'}
                 </button>
               </div>
-              <div className="bg-gray-50 rounded-lg p-6 shadow-sm h-full flex flex-col">
+              <div className="bg-gray-50 p-6 shadow-sm h-full flex flex-col">
                 <h2 className="text-center text-lg font-semibold text-primary mb-4">Download</h2>
                 <div className="mb-4">
                   <label className="block mb-2 font-semibold text-primary">To:</label>
@@ -402,7 +406,7 @@ const TranslatePage: NextPage = () => {
                 </div>
                 <button
                   onClick={handleFileDownload}
-                  disabled={!fileTranslationResult}
+                  disabled={!fileTranslationResult || isFileLoading}
                   className="w-full py-3 bg-secondary text-white font-semibold rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {fileTranslationType === 'pdfToPdf' ? 'Download PDF' : 'Download DOCX'}

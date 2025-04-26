@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 class FileBase(BaseModel):
     filename: str
@@ -12,7 +12,7 @@ class FileCreate(FileBase):
     filename: str
     file_type: str
     source: str
-    uploaded_at: datetime
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(hours=-5), name="EST")))
     file_path: str
 
 class FileOut(FileBase):

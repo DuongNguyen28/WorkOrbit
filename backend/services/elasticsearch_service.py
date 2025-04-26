@@ -55,8 +55,8 @@ class ElasticSearchService:
     #         documents = json.loads(f.read())
     #     return self.insert_documents(documents=documents)
 
-    # def search(self, **query_args):
-    #     return self.es.search(index="idx", **query_args)
+    def search(self, **query_args):
+        return self.es.search(index="idx", **query_args)
 
     # def retrieve_document(self, id):
     #     return self.es.get(index="idx", id=id)
@@ -88,7 +88,7 @@ class ElasticSearchService:
 
         with open(file_path, "rb") as pdf_file:
             enc_file = base64.b64encode(pdf_file.read()).decode("utf-8")
-
+        
         url = self.upload_file(file_path, file_type)
         
         os.remove(file_path)

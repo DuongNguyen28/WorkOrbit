@@ -42,3 +42,16 @@ def get_user_by_username(db: Session, username: str) -> Optional[User]:
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email).first()
+
+def update(db: Session, user_id: int, user_data: UserCreate):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+    if user_data.password:
+        user.password_hash = get_password_hash(user_data.password)
+    user.username = user_data.username
+    user.email = user_data.email
+    
+    db.commit()
+    db.refresh(user)
+    return user
