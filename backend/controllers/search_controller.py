@@ -18,11 +18,11 @@ search_router = APIRouter(
 )
 es = ElasticSearchService()
 
-def setup_test_idx():
-    es.reindex()
+# def setup_test_idx():
+#     es.reindex()
 
-def get_my_id():
-    es.retrieve_document("my_id")
+# def get_my_id():
+#     es.retrieve_document("my_id")
 
 EST = timezone(timedelta(hours=-5), name="EST")
 
@@ -168,12 +168,12 @@ def handle_search(query: str, file_type: str=None, db: Session = Depends(get_db)
 
     return [FileOut.model_validate(file).model_dump() for file in files]
 
-async def retrieve_document(doc_id: str):
-    document = es.retrieve_document(doc_id)
-    return document
-    # title = document["_source"]["name"]
-    # paragraphs = document["_source"]["content"].split("\n")
-    # return {"title": title, "paragraphs": paragraphs}
+# async def retrieve_document(doc_id: str):
+#     document = es.retrieve_document(doc_id)
+#     return document
+#     # title = document["_source"]["name"]
+#     # paragraphs = document["_source"]["content"].split("\n")
+#     # return {"title": title, "paragraphs": paragraphs}
 
 
 def extract_filters(query):

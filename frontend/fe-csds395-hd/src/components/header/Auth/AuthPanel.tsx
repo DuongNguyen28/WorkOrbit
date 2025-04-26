@@ -33,6 +33,7 @@ function AuthPanel({ mode, onSwitchMode, className /*, onSuccess, onError */ }: 
   const router = useRouter(); // Hook for programmatic navigation
 
   // == Internal Submit Handler ==
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission (page reload)
     setIsLoading(true);
@@ -70,6 +71,11 @@ function AuthPanel({ mode, onSwitchMode, className /*, onSuccess, onError */ }: 
       console.log('Authentication successful:', data);
 
       if (isLogin) {
+        if (data.access_token) {
+          localStorage.setItem('jwt', data.access_token);
+        } else {
+          console.error('No access token found in response!');
+        }
         router.push('/landing');
       } else {
         alert('Sign up successful! Please log in.'); 

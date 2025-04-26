@@ -1,9 +1,11 @@
 'use client';
+import { useAuthGuard } from '@/components/AuthGuard';
 //dung tam gpt, chua test duoc, nen setup file storage trc vi ingest pipeline hoat dong r
 
 import { useState } from 'react';
 
 export default function UploadPage() {
+  useAuthGuard();
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState<string>('');
 
