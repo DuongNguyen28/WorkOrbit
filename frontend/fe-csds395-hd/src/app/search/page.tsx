@@ -153,14 +153,14 @@ const SearchPage: NextPage = () => {
       <Header />
       <main className="p-4">
         <h1 className="text-3xl font-bold text-gray-800 mt-8">Document Search</h1>
-        <form onSubmit={handleSubmit} className="flex items-center w-full">
+        <form onSubmit={handleSubmit} className="flex items-center w-full mt-8">
           <div className="flex-grow">
             <SearchBar value={query} onChange={handleSearch} />
           </div>
           <div>
             <button
               type="submit"
-              className="ml-2 px-4 py-2 bg-blue-500 text-white rounded border border-blue-700"
+              className="ml-2 px-4 bg-blue-500 text-white rounded border border-blue-700 h-10 hover:bg-[#002a45]"
             >
               Search
             </button>

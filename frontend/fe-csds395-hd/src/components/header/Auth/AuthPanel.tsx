@@ -35,7 +35,7 @@ function AuthPanel({ mode, onSwitchMode, className /*, onSuccess, onError */ }: 
   // == Internal Submit Handler ==
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission (page reload)
+    e.preventDefault();
     setIsLoading(true);
     setError(null);
 
@@ -45,7 +45,7 @@ function AuthPanel({ mode, onSwitchMode, className /*, onSuccess, onError */ }: 
     const payload = isLogin ? { username, password } : { username, email, password };
 
     console.log(`Submitting ${mode} request to: ${url}`);
-    console.log("Payload being sent:", payload); // <-- ADD THIS LINE
+    console.log("Payload being sent:", payload);
 
     try {
       const response = await fetch(url, {
