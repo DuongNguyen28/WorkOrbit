@@ -7,6 +7,7 @@ import languages from '@/data/languages.json'
 
 import Header from '@components/header/Header'
 import Chatbot from '@components/header/Chatbot'
+import { useAuthGuard } from '@/components/AuthGuard'
 
 interface LanguageOption {
   code: string
@@ -16,6 +17,8 @@ interface LanguageOption {
 const languageOptions: LanguageOption[] = languages
 
 const TranslatePage: NextPage = () => {
+  useAuthGuard()
+
   const [activeTab, setActiveTab] = useState<'text' | 'file'>('text')
   const [sourceLang, setSourceLang] = useState<LanguageOption | null>(null)
   const [targetLang, setTargetLang] = useState<LanguageOption | null>(null)
