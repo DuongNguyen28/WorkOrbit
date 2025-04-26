@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
 interface TokenPayload {
-  sub?: string; // sub is optional, reflecting reality
+  sub?: string;
 }
 
 function Welcome() {
@@ -23,14 +23,12 @@ function Welcome() {
               }
             });
 
-            console.log(response)
             if (!response.ok) {
               throw new Error('Failed to fetch user data');
             }
             const data = await response.json();
             setUsername(data.username);
           } else {
-            // No email in token, treat as invalid
             setUsername(null);
           }
         } catch (error) {
