@@ -152,7 +152,7 @@ def handle_search(query: str, file_type: str=None, db: Session = Depends(get_db)
     #         for bucket in results["aggregations"]["year-agg"]["buckets"]
     #         if bucket["doc_count"] > 0
     #     },
-    #}
+    # }
 
     sql_ids = [hit["_source"]["sql_id"] for hit in results["hits"]["hits"] if "_source" in hit and "sql_id" in hit["_source"]]
 
@@ -168,12 +168,12 @@ def handle_search(query: str, file_type: str=None, db: Session = Depends(get_db)
 
     return [FileOut.model_validate(file).model_dump() for file in files]
 
-# async def retrieve_document(doc_id: str):
-#     document = es.retrieve_document(doc_id)
-#     return document
-#     # title = document["_source"]["name"]
-#     # paragraphs = document["_source"]["content"].split("\n")
-#     # return {"title": title, "paragraphs": paragraphs}
+async def retrieve_document(doc_id: str):
+    document = es.retrieve_document(doc_id)
+    return document
+    # title = document["_source"]["name"]
+    # paragraphs = document["_source"]["content"].split("\n")
+    # return {"title": title, "paragraphs": paragraphs}
 
 
 def extract_filters(query):
