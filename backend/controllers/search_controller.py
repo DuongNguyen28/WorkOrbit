@@ -79,7 +79,7 @@ def upload(file: UploadFile = FastAPIFile(...), db: Session = Depends(get_db)):
 
 
 @search_router.post("/")
-def handle_search(query: str, file_type: str=None, db: Session = Depends(get_db)):
+def handle_search(query: str=None, file_type: str=None, db: Session = Depends(get_db)):
     filters, parsed_query = extract_filters(query)
     print(parsed_query)
     from_ = 0 # for pagination
@@ -89,8 +89,7 @@ def handle_search(query: str, file_type: str=None, db: Session = Depends(get_db)
             "must": {
                 "multi_match": {
                     "query": parsed_query,
-                    #"fields": ["name", "summary", "content"],
-                    "fields": ["attachment.content"]
+                    "fields": ["name", "attachment.content"]
                 }
             }
         }
@@ -99,8 +98,7 @@ def handle_search(query: str, file_type: str=None, db: Session = Depends(get_db)
 
     if file_type:
         file_type_filter = {"term": {"file_type": file_type.lower()}}
-        # If your extract_filters function already returned filters that use a "filter" key,
-        # merge the file_type filter with the existing ones.
+
         if "filter" in filters:
             if isinstance(filters["filter"], list):
                 filters["filter"].append(file_type_filter)

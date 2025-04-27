@@ -26,7 +26,7 @@ def list_files(
         q = q.filter(File.source == source)
     if file_type:
         q = q.filter(File.file_type == file_type)
-    q = q.order_by(desc(File.uploaded_at)).limit(5)
+    q = q.order_by(desc(File.uploaded_at))
     return q.all()
 
 # Get number of files

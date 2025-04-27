@@ -64,7 +64,7 @@ export default function RecentActivities() {
         {loading ? (
           <p className="text-gray-500">Loading recent activities...</p>
         ) : (
-          recentFiles.map((file) => (
+          recentFiles.slice(0,5).map((file) => (
             <ActivityItem
             key={file.id}
             icon={getIcon(file.file_type)}

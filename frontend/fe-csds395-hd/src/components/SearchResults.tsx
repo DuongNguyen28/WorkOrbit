@@ -10,12 +10,13 @@ interface TransformedResult {
 }
 
 interface SearchResultsProps {
-  searchResults: TransformedResult[];
-  isLoading: boolean;
-  hasSearched: boolean;
+    searchResults: TransformedResult[];
+    isLoading: boolean;
+    hasSearched: boolean;
+    onDelete: (id: number) => void;
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchResults, isLoading, hasSearched }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchResults, isLoading, hasSearched, onDelete }) => {
     return (
         <div className="space-y-4">
         {isLoading ? (
@@ -25,7 +26,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchResults, isLoading,
         ) : hasSearched ? (
             searchResults.length > 0 ? (
             searchResults.map((result) => (
-                <SearchResultItem key={result.id} result={result} />
+                <SearchResultItem key={result.id} result={result} onDelete={onDelete}/>
             ))
             ) : (
             <p>No results found.</p>

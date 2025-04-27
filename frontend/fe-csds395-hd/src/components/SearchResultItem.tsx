@@ -11,6 +11,7 @@ interface TransformedResult {
 
 interface SearchResultItemProps {
   result: TransformedResult;
+  onDelete: (id: number) => void;
 }
 
 const getIcon = (fileType: string) => {
@@ -28,20 +29,28 @@ const getIcon = (fileType: string) => {
   }
 };
 
-const SearchResultItem: React.FC<SearchResultItemProps> = ({ result }) => {
+const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, onDelete }) => {
   const { fileName, modified, category, file_path } = result;
 
   return (
     <div
-      onClick={() => window.open(file_path, '_blank')}
       className="block p-4 rounded-lg hover:bg-gray-100 cursor-pointer"
     >
       <div className="flex items-center space-x-4">
         {getIcon(category)}
-        <div>
+        <div 
+          onClick={() => window.open(file_path, '_blank')}
+          className="flex-1 cursor-pointer hover:underline"
+        >
           <p className="font-semibold">{fileName}</p>
           <p className="text-sm text-gray-500">{modified}</p>
         </div>
+        <button
+          onClick={() => onDelete(result.id)}
+          className="text-red-500 hover:text-red-700"
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
